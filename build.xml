@@ -1,0 +1,84 @@
+<project name="mcp" default="compile" basedir=".">
+
+	<property name="src.dir" location="src/minecraft"/>
+	<property name="build.dir" location="bin/minecraft"/>
+	<property name="dist.dir" location="dist"/>
+	<property name="lib.dir" location="lib"/>
+	<property name="lwjgl.jars.dir" location="jars/bin"/>
+	<property name="lwjgl.natives.dir" location="jars/bin/natives"/>
+	<property name="resources.dir" location="temp/bin/minecraft"/>
+	<property name="run.dir" location="run"/>
+	<property name="minecraft.jar" location="jars/bin/minecraft.jar"/>
+	<property name="main-class" value="Start"/>
+
+	<path id="build.path">
+		<fileset dir="${lib.dir}" includes="**/*.jar"/>
+		<pathelement location="${resources.dir}"/>
+		<fileset dir="${lwjgl.jars.dir}">
+			<include name="jinput.jar"/>
+			<include name="lwjgl.jar"/>
+			<include name="lwjgl_util.jar"/>
+		</fileset>
+	</path>
+
+	<path id="run.path">
+		<pathelement location="${build.dir}"/>
+		<pathelement location="${src.dir}"/>
+		<path refid="build.path"/>
+	</path>
+
+	<target name="init">
+		<mkdir dir="${build.dir}"/>
+	</target>
+
+	<target name="debug">
+		<property name="debug.path" refid="run.path"/>
+		<echo message="Classpath = ${debug.path}"/>
+	</target>
+
+	<target name="compile" depends="init">
+		<javac
+			includeantruntime="false"
+			srcdir="${src.dir}"
+			destdir="${build.dir}"
+			encoding="UTF-8"
+			debug="true"
+			deprecation="true"
+			source="1.6"
+			target="1.6"
+			classpathref="build.path"
+		>
+			<compilerarg value="-Xlint:-options"/>
+			<compilerarg value="-Xlint:-deprecation"/>
+			<compilerarg value="-Xlint:-dep-ann"/>
+			<compilerarg value="-Xlint:-unchecked"/>
+		</javac>
+	</target>
+
+	<target name="run" depends="compile">
+		<mkdir dir="${run.dir}"/>
+		<java
+			dir="${run.dir}"
+			classname="${main-class}"
+			fork="true"
+			maxmemory="1024m"
+			classpathref="run.path"
+		>
+			<jvmarg value="-ea"/>
+			<jvmarg value="-Xincgc"/>
+			<jvmarg value="-Djava.library.path=${lwjgl.natives.dir}"/>
+		</java>
+	</target>
+
+	<target name="reobf" depends="compile">
+		<exec executable="python" dir=".">
+			<arg value="runtime/reobfuscate.py" />
+		</exec>
+	</target>
+
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+		<delete dir="${dist.dir}"/>
+	</target>
+</project>
+
