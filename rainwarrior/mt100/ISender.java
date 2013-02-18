@@ -23,6 +23,9 @@ package rainwarrior.mt100;
 
 import java.util.Iterator;
 
+/*
+ * Sender is responsible for maintaining connections with it's receivers
+ */
 public interface ISender
 {
 	public boolean connected(IReceiver r);

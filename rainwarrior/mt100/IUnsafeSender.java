@@ -21,6 +21,9 @@ along with MT100. If not, see <http://www.gnu.org/licenses/>.
 
 package rainwarrior.mt100;
 
+/*
+ * Same as ISender, but doesn't do checks when connecting/disconnecting
+ */
 public interface IUnsafeSender
 {
 	public boolean connected(IReceiver rec);
