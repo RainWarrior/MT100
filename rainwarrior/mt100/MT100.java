@@ -99,6 +99,10 @@ public class MT100 // extends BaseMod
 	@PostInit
 	public void postInit(FMLPostInitializationEvent event)
 	{
+		MT100.logger.info("Copyright (C) 2012 RainWarrior");
+		MT100.logger.info("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.");
+		MT100.logger.info("MT100 is free software: you are free to change and redistribute it.");
+		MT100.logger.info("There is NO WARRANTY, to the extent permitted by law.");
 	}
 
 	public static void registerTicker(ITicker t)
