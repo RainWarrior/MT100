@@ -44,7 +44,6 @@ public class GuiMT100 extends GuiScreen implements ISender, ITicker
 	boolean alt = false;
 	int key;
 	int asc;
-	int tickCount = 0;
 
 	public GuiMT100(TileEntityMT100 te, Screen screen)
 	{
@@ -117,12 +116,7 @@ public class GuiMT100 extends GuiScreen implements ISender, ITicker
 
 		float cw = 320;
 		float ch = 240;
-		float angle = tickCount + parTick;
-		angle = angle % 360;
-		if(angle > 90 && angle < 270) angle -= 180;
-		GL11.glTranslatef((width)/ 2F, (height)/ 2F, 0F);
-		GL11.glRotatef(angle, 0, 1, 0);
-		GL11.glTranslatef((- cw)/ 2F, (- ch)/ 2F, 0F);
+		GL11.glTranslatef((width - cw)/ 2F, (height - ch)/ 2F, 0F);
 		te.pstFontRenderer.renderScreen(screen, cw, ch, false);
 		GL11.glPopMatrix();
 //		this.fontRenderer.drawStringWithShadow(new String(screen.screen), 50, 50, 0xFFFF0000);
@@ -131,7 +125,6 @@ public class GuiMT100 extends GuiScreen implements ISender, ITicker
 	@Override
 	public void updateScreen()
 	{
-		tickCount++;
 	}
 
 	@Override
