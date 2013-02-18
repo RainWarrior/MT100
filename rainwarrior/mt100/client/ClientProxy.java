@@ -33,8 +33,6 @@ public class ClientProxy extends CommonProxy
 	public void registerStuff()
 	{
 		super.registerStuff();
-		MinecraftForgeClient.preloadTexture(ITEMS_PNG);
-		MinecraftForgeClient.preloadTexture(BLOCK_PNG);
 		for(int i=0; i < 27; i++)
 		{
 			MinecraftForgeClient.preloadTexture("/rainwarrior/mt100/client/2/rr2-" + i + ".png");

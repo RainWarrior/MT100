@@ -31,12 +31,9 @@ import cpw.mods.fml.common.FMLCommonHandler;
 
 public class CommonProxy
 {
-	public static String ITEMS_PNG = "/rainwarrior/mt100/items.png";
-	public static String BLOCK_PNG = "/rainwarrior/mt100/block.png";
-
 	public CommonProxy()
 	{
-		MT100.logger.info("Proxy!");
+//		MT100.logger.info("Proxy!");
 	}
 
 	public void registerStuff()
