@@ -39,7 +39,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.SideOnly;
 import cpw.mods.fml.relauncher.Side;
 import rainwarrior.mt100.client.GuiMT100;
-import rainwarrior.mt100.client.PstFontRenderer;
+import rainwarrior.mt100.client.PstFontRegistry;
 
 public class TileEntityMT100 extends TileEntity implements IReceiver, ISender // ITicker
 {
@@ -56,7 +56,6 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	DropBuffer d;
 	public int tick = 0;
 	@SideOnly(Side.CLIENT)
-	public PstFontRenderer pstFontRenderer;
 
 	public TileEntityMT100()
 	{
@@ -64,7 +63,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	}
 	public TileEntityMT100(boolean isServer)
 	{
-		screen = new Screen(40, 12);
+		screen = new Screen(80, 48, true);
 		netInput = new QueueBuffer(Reference.PACKET_SIZE, true);
 		netOutput = new QueueBuffer(Reference.PACKET_SIZE * 2, Reference.NET_QUOTA, true);
 		this.isServer = isServer;
@@ -84,12 +83,6 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 			d = new DropBuffer(true);
 			netInput.connect(d);
 			d.connect(screen);
-//			this.pstFontRenderer = new PstFontRenderer("Lat15-VGA8.psf.gz");
-//			this.pstFontRenderer = new PstFontRenderer("Lat15-Fixed16.psf.gz");
-//			this.pstFontRenderer = new PstFontRenderer("Lat15-VGA32x16.psf.gz");
-			this.pstFontRenderer = new PstFontRenderer("Uni2-Terminus16.psf.gz");
-//			this.pstFontRenderer = new PstFontRenderer("Lat15-Terminus14.psf.gz");
-//			this.pstFontRenderer = new PstFontRenderer("Lat15-Terminus20x10.psf.gz");
 		}
 //		MT100.logger.info("new TileEntityMT100, side: " + FMLCommonHandler.instance().getEffectiveSide());
 	}

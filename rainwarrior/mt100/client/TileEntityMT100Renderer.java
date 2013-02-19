@@ -62,8 +62,8 @@ public class TileEntityMT100Renderer extends TileEntitySpecialRenderer
 		GL11.glTranslated(x, y, z);
 		GL11.glScaled(-1D/16D, -1D/16D, -1D/16D);
 		GL11.glTranslatef(-15, -14, 0);
-		te.pstFontRenderer.renderScreen(te.screen, 14, 12, false);
-		GL11.glTranslatef(7, 6, -8);
+		te.screen.render(14, 12);
+/*		GL11.glTranslatef(7, 6, -8);
 		Tessellator tes = Tessellator.instance;
 		GL11.glDisable(GL11.GL_TEXTURE_2D);
 		tes.startDrawingQuads();
@@ -100,7 +100,7 @@ public class TileEntityMT100Renderer extends TileEntitySpecialRenderer
 		tes.addVertexWithUV(w1, -w1, -8, 1, 0);
 		tes.addVertexWithUV(w1, w1, -8, 1, 1);
 		tes.addVertexWithUV(-w1, w1, -8, 0, 1);
-		tes.draw();
+		tes.draw();*/
 		
 		GL11.glPopMatrix();
 	}
