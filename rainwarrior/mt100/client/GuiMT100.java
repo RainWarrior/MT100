@@ -117,7 +117,7 @@ public class GuiMT100 extends GuiScreen implements ISender, ITicker
 		float cw = 320;
 		float ch = 240;
 		GL11.glTranslatef((width - cw)/ 2F, (height - ch)/ 2F, 0F);
-		te.pstFontRenderer.renderScreen(screen, cw, ch, false);
+		screen.render(cw, ch);
 		GL11.glPopMatrix();
 //		this.fontRenderer.drawStringWithShadow(new String(screen.screen), 50, 50, 0xFFFF0000);
 	}

@@ -23,6 +23,7 @@ package rainwarrior.mt100.client;
 
 import net.minecraftforge.client.MinecraftForgeClient;
 import rainwarrior.mt100.*;
+import rainwarrior.mt100.client.PstFontRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import net.minecraft.util.Timer;
@@ -33,6 +34,7 @@ public class ClientProxy extends CommonProxy
 	public void registerStuff()
 	{
 		super.registerStuff();
+		PstFontRegistry.init();
 		for(int i=0; i < 27; i++)
 		{
 			MinecraftForgeClient.preloadTexture("/rainwarrior/mt100/client/2/rr2-" + i + ".png");
