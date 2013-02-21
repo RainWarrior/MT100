@@ -61,6 +61,8 @@ public class Screen
 	int scroll=0;
 	public int width;
 	public int height;
+	boolean wrapx = true, wrapy = true;
+	boolean doScroll = true;
 	static boolean debug = true;
 
 	static
@@ -182,24 +184,55 @@ public class Screen
 		// TODO
 	}
 
-	public void writeWithShift(int b, boolean wrapx, boolean wrapy, boolean doScroll)
+	public void writeWithShift(int b)
 	{
 		if(x >= 0 && x < width && y >= 0 && y < width)
 		{
 			screen[x + y * width] = b;
 		}
+		moveRightWithShift();
+	}
+
+	public void moveRightWithShift()
+	{
 		x++;
 		if(x == width && wrapx)
 		{
-			x = 0;
-			y++;
-			if(y == height && wrapy) y = 0;
-			if(doScroll && y == scroll)
-			{
-				this.scroll++;
-				if(scroll >= height) scroll -= height;
-			}
+			x -= width;
+			moveDownWithShift();
 		}
+	}
+
+	public void moveDownWithShift()
+	{
+		y++;
+		if(y == height && wrapy) y -= height;
+		if(doScroll && y == scroll)
+		{
+			this.scroll++;
+			if(scroll == height) scroll -= height;
+		}
+	}
+
+	public void moveLeftWithShift()
+	{
+		x--;
+		if(x == -1 && wrapx)
+		{
+			x += width;
+			moveUpWithShift();
+		}
+	}
+
+	public void moveUpWithShift()
+	{
+		if(doScroll && y == scroll)
+		{
+			this.scroll--;
+			if(scroll == -1) scroll += height;
+		}
+		y--;
+		if(y == -1 && wrapy) y += height;
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -215,7 +248,7 @@ public class Screen
 		double cy = ch/height;
 		double tx, ty;
 		double x, y;
-		double eps = 1D/8D;
+		double eps = 1D/128D;
 		Integer c;
 		// First pass - background, second pass - foreground
 		for(int pass=0; pass < 2; pass++)
@@ -245,6 +278,14 @@ public class Screen
 						tes.addVertex(x, y + cy, 0F);
 						tes.addVertex(x + cx, y + cy, 0F);
 						tes.addVertex(x + cx, y, 0F);
+						if(I == this.y && j == this.x) // cursor
+						{
+							setColorToTesselator(tes, k + 4);
+							tes.addVertex(x, y + cy * .9, eps);
+							tes.addVertex(x, y + cy, eps);
+							tes.addVertex(x + cx, y + cy, eps);
+							tes.addVertex(x + cx, y + cy * .9, eps);
+						}
 					}
 					else
 					{
@@ -285,6 +326,14 @@ public class Screen
 							GL11.glTexCoord2d(tx + curFont.width, ty + curFont.height);
 							GL11.glVertex3d(x + cx, y + cy, 0.F);
 							GL11.glEnd();*/
+							if(I == this.y && j == this.x) // cursor
+							{
+								setColorToTesselator(tes, k - 4);
+								tes.addVertexWithUV(x, y + cy * .9, eps, tx + eps, ty + eps);
+								tes.addVertexWithUV(x, y + cy, eps, tx + eps, ty + curFont.height - eps);
+								tes.addVertexWithUV(x + cx, y + cy, eps, tx + curFont.width - eps, ty + curFont.height - eps);
+								tes.addVertexWithUV(x + cx, y + cy * .9, eps, tx + curFont.width - eps, ty + eps);
+							}
 						}
 					}
 				}

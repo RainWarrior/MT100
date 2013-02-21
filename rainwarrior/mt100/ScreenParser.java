@@ -73,8 +73,6 @@ public class ScreenParser implements IReceiver, ITicker
 	int c = 0;
 	int shift = 0;
 	State curState;
-	boolean wrapx = true, wrapy = true;
-	boolean doScroll = true;
 	long csiInters = 0;
 	long csiParams = 0;
 
@@ -250,7 +248,7 @@ public class ScreenParser implements IReceiver, ITicker
 					case GROUND:
 						if(c >= 0x20 && c < 0x7F || c >= 0xA0)
 						{
-							screen.writeWithShift(c, wrapx, wrapy, doScroll);
+							screen.writeWithShift(c);
 						}
 						else if(c == 7F) // DELETE
 						{
@@ -285,6 +283,21 @@ public class ScreenParser implements IReceiver, ITicker
 						{
 							// TODO dispatch CSI
 							MT100.logger.info("CSI: P: " + csiParams + ", I: " + csiInters + ", F: " + c);
+							switch(c) // TODO move by n, not by 1
+							{
+								case 0x41: // CUU - CURSOR UP
+									screen.moveUpWithShift();
+									break;
+								case 0x42: // CUD - CURSOR DOWN
+									screen.moveDownWithShift();
+									break;
+								case 0x43: // CUF - CURSOR RIGHT
+									screen.moveRightWithShift();
+									break;
+								case 0x44: // CUB - CURSOR LEFT
+									screen.moveLeftWithShift();
+									break;
+							}
 							curState = State.GROUND;
 						}
 						else
