@@ -46,6 +46,8 @@ import org.lwjgl.input.Mouse;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL13;
 import rainwarrior.mt100.*;
+import rainwarrior.mt100.Sym.C0;
+import rainwarrior.mt100.Sym.C1;
 
 public class GuiMT100 extends GuiScreen implements ISender, ITicker
 {
@@ -196,6 +198,7 @@ public class GuiMT100 extends GuiScreen implements ISender, ITicker
 			else
 			{
 				key = 0;
+				asc = 0;
 			}
 			updateTimer();
 		}
@@ -214,34 +217,45 @@ public class GuiMT100 extends GuiScreen implements ISender, ITicker
 		pt = 0;
 
 		// generate symbol based on keys. TODO
-		ArrayList data;
+		ArrayList data = null;
 		switch(key)
 		{
 			case Keyboard.KEY_UP:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)0x1B); // ESC
+				data.add((byte)C0.ESC.val);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x41); // A
+				break;
 			case Keyboard.KEY_DOWN:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)0x1B); // ESC
+				data.add((byte)C0.ESC.val);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x42); // B
+				break;
 			case Keyboard.KEY_RIGHT:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)0x1B); // ESC
+				data.add((byte)C0.ESC.val);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x43); // C
+				break;
 			case Keyboard.KEY_LEFT:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)0x1B); // ESC
+				data.add((byte)C0.ESC.val);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x44); // D
+				break;
 			default:
-				data = new ArrayList<Byte>(1);
-				data.add((byte)asc);
+				if(asc != 0)
+				{
+					data = new ArrayList<Byte>(1);
+					data.add((byte)asc);
+				}
+				break;
 		}
-		buffer.receive(data.iterator());
+		if(data != null)
+		{
+			buffer.receive(data.iterator());
+		}
 	}
 
 	@Override

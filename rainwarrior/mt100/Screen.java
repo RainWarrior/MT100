@@ -51,26 +51,8 @@ import org.lwjgl.opengl.GL11;
 import rainwarrior.mt100.client.PstFontRegistry;
 import rainwarrior.mt100.client.PstFont;
 
-public class Screen implements IReceiver, ITicker
+public class Screen
 {
-	public enum State
-	{
-		GROUND,
-		ESCAPE,
-		ESCAPE_INTERMEDIATE,
-		CSI_ENTRY,
-		CSI_PARAM,
-		CSI_INTERMEDIATE,
-		CSI_IGNORE,
-		DCS_ENTRY,
-		DCS_PARAM,
-		DCS_INTERMEDIATE,
-		DCS_PASSTHROUGH,
-		DCS_IGNORE,
-		OSC_STRING
-	}
-
-	QueueBuffer buffer = new QueueBuffer(false);
 	public int[] screen;
 	public byte[] color; // RGBA background, RGBA foreground
 	protected boolean hasColor;
@@ -78,10 +60,6 @@ public class Screen implements IReceiver, ITicker
 	int x; int y;
 	public int width;
 	public int height;
-	boolean wrapx = true;
-	boolean wrapy = true;
-	Byte cur;
-	State curState;
 	static boolean debug = true;
 
 	static
@@ -106,20 +84,6 @@ public class Screen implements IReceiver, ITicker
 		};
 	}
 
-	@Override
-	public int capacity()
-	{
-		return buffer.capacity();
-	}
-
-	@Override
-	public int receive(Iterator<Byte> data)
-	{
-		int ret = buffer.receive(data);
-//		MT100.logger.info("4 " + FMLCommonHandler.instance().getEffectiveSide() + ret + " " + buffer.buffer.size());
-		return ret;
-	}
-
 	public Screen(int width, int height, boolean hasColor)
 	{
 		screen = new int[width * height];
@@ -139,7 +103,6 @@ public class Screen implements IReceiver, ITicker
 			screen[i] = (i & 0xFF);
 		}
 		resetColors_ARGB(0xFF000000, 0xFFFFFFFF);
-		curState = State.GROUND;
 	}
 
 	public void resetColors_ARGB(int bColor, int fColor)
@@ -218,51 +181,21 @@ public class Screen implements IReceiver, ITicker
 		// TODO
 	}
 
-	@Override
-	public void update()
+	public void writeWithShift(int b, boolean wrapx, boolean wrapy)
 	{
-		int quota = Reference.SCREEN_UPDATE_QUOTA;
-//		MT100.logger.info("Supdate: '" + buffer.buffer.size() + "', side: " + FMLCommonHandler.instance().getEffectiveSide());
-		while(!buffer.buffer.isEmpty() && quota != 0)
+		if(x >= 0 && x < width && y >= 0 && y < width)
 		{
-			Byte c = buffer.buffer.poll();
-			parse(c);
-			if(quota > 0) quota--;
+			screen[x + y * width] = b;
 		}
-	}
-
-	public void parse(byte b)
-	{ // here we go...
-/*		switch(b)
+		x++;
+		if(x >= width && wrapx)
 		{
-			case Sym.ESC:
-				curState = State.ESCAPE;
-				return;
-			case 
-		}*/
-//		MT100.logger.info("parse: '" + b + "', side: " + FMLCommonHandler.instance().getEffectiveSide());
-		switch(curState)
+			x = 0;
+			y++;
+		}
+		if(y >= height && wrapy)
 		{
-			case GROUND:
-				if(b >= 0x20 && b < 0x7F)
-				{
-					//char c = (char)(b);
-					if(x >= 0 && x < width && y >= 0 && y < width)
-					{
-						screen[x + y * width] = b;
-					}
-					x++;
-					if(x >= width && wrapx)
-					{
-						x = 0;
-						y++;
-					}
-					if(y >= height && wrapy)
-					{
-						y = 0;
-					}
-				}
-			break;
+			y = 0;
 		}
 	}
 
