@@ -222,25 +222,25 @@ public class GuiMT100 extends GuiScreen implements ISender, ITicker
 		{
 			case Keyboard.KEY_UP:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)C0.ESC.val);
+				data.add((byte)C0.ESC);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x41); // A
 				break;
 			case Keyboard.KEY_DOWN:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)C0.ESC.val);
+				data.add((byte)C0.ESC);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x42); // B
 				break;
 			case Keyboard.KEY_RIGHT:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)C0.ESC.val);
+				data.add((byte)C0.ESC);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x43); // C
 				break;
 			case Keyboard.KEY_LEFT:
 				data = new ArrayList<Byte>(3);
-				data.add((byte)C0.ESC.val);
+				data.add((byte)C0.ESC);
 				data.add((byte)0x5B); // [
 				data.add((byte)0x44); // D
 				break;

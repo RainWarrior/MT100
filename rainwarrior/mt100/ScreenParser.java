@@ -55,14 +55,14 @@ public class ScreenParser implements IReceiver, ITicker
 	{
 		GROUND,
 		ESCAPE,
-		ESCAPE_INTERMEDIATE,
-		CSI_ENTRY,
+		ESCAPE_INTER,
 		CSI_PARAM,
-		CSI_INTERMEDIATE,
+		CSI_INTER,
+		CSI_FINAL,
 		CSI_IGNORE,
 		DCS_ENTRY,
 		DCS_PARAM,
-		DCS_INTERMEDIATE,
+		DCS_INTER,
 		DCS_PASSTHROUGH,
 		DCS_IGNORE,
 		OSC_STRING
@@ -75,6 +75,8 @@ public class ScreenParser implements IReceiver, ITicker
 	State curState;
 	boolean wrapx = true, wrapy = true;
 	boolean doScroll = true;
+	long csiInters = 0;
+	long csiParams = 0;
 
 	@Override
 	public int capacity()
@@ -183,64 +185,118 @@ public class ScreenParser implements IReceiver, ITicker
 
 	public void parseChar()
 	{ // here we go...
-		if(c == C0.ESC.val)
+		boolean repeat;
+		do
 		{
-			curState = State.ESCAPE;
-			MT100.logger.info("parseChar, ESC");
-			return;
+			repeat = false;
+			if(c < 0x20) // C0
+			{
+				// TODO
+				MT100.logger.info("parseChar, C0: " + c);
+				switch(c)
+				{
+					case C0.ESC:
+						curState = State.ESCAPE;
+						break;
+				}
+			}
+			else if(c >= 0x80 && c <= 0xA0) // C1
+			{
+				// TODO
+				MT100.logger.info("parseChar, C1: " + c);
+				switch(c)
+				{
+					case C1.CSI:
+						curState = State.CSI_PARAM;
+						csiInters = 0;
+						csiParams = 0;
+						break;
+				}
+			}
+	//		MT100.logger.info("parse: '" + b + "', side: " + FMLCommonHandler.instance().getEffectiveSide());
+			else
+			{
+				switch(curState)
+				{
+					case ESCAPE:
+						MT100.logger.info("parseChar, ESC2: " + c);
+						if(c < 0x20 || c >= 0x7F) // illegal char
+						{
+							MT100.logger.warning("parseChar, illegal char in escape sequence, ignoring: " + c);
+							curState = State.GROUND;
+						}
+						else if(c < 0x30) // nF
+						{
+							// TODO
+							curState = State.GROUND;
+						}
+						else if(c < 0x40) // Fp, Private CF
+						{
+							// TODO
+							curState = State.GROUND;
+						}
+						else if(c < 0x60) // ESC Fe, C1
+						{
+							c += 0x40;
+							curState = State.GROUND;
+							repeat = true;
+						}
+						else             // Fs, Single CF
+						{
+							// TODO
+							curState = State.GROUND;
+						}
+						break;
+					case GROUND:
+						if(c >= 0x20 && c < 0x7F || c >= 0xA0)
+						{
+							screen.writeWithShift(c, wrapx, wrapy, doScroll);
+						}
+						else if(c == 7F) // DELETE
+						{
+						}
+						break;
+					case CSI_PARAM:
+						if(c >= 0x30 && c < 0x40)
+						{
+							csiParams <<= 4;
+							csiParams |= (c & 0xF);
+						}
+						else
+						{
+							curState = State.CSI_INTER;
+							repeat = true;
+						}
+						break;
+					case CSI_INTER:
+						if(c >= 0x20 && c < 0x30)
+						{
+							csiInters <<= 4;
+							csiInters |= (c & 0xF);
+						}
+						else
+						{
+							curState = State.CSI_FINAL;
+							repeat = true;
+						}
+						break;
+					case CSI_FINAL:
+						if(c >= 0x40 && c < 0x7F)
+						{
+							// TODO dispatch CSI
+							MT100.logger.info("CSI: P: " + csiParams + ", I: " + csiInters + ", F: " + c);
+							curState = State.GROUND;
+						}
+						else
+						{
+							MT100.logger.warning("parseChar, illegal char in CSI sequence, ignoring: " + c);
+							curState = State.GROUND;
+						}
+						break;
+				}
+			}
 		}
-//		MT100.logger.info("parse: '" + b + "', side: " + FMLCommonHandler.instance().getEffectiveSide());
-		switch(curState)
-		{
-			case ESCAPE:
-				MT100.logger.info("parseChar, ESC2: " + c);
-				if(c < 0x20 || c >= 0x7F) // illegal char
-				{
-					MT100.logger.warning("parseChar, illegal char in escape sequence, ignoring: " + c);
-					curState = State.GROUND;
-				}
-				else if(c < 0x30) // nF
-				{
-					// TODO
-					curState = State.GROUND;
-				}
-				else if(c < 0x40) // Fp, Private CF
-				{
-					// TODO
-					curState = State.GROUND;
-				}
-				else if(c < 0x60) // ESC Fe, C1
-				{
-					c += 0x40;
-					curState = State.GROUND;
-					parseChar();
-				}
-				else             // Fs, Single CF
-				{
-					// TODO
-					curState = State.GROUND;
-				}
-				break;
-			case GROUND:
-				if(c < 0x20) // C0
-				{
-					// TODO
-					MT100.logger.info("parseChar, C0: " + c);
-				}
-				else if(c >= 0x20 && c < 0x7F)
-				{
-					screen.writeWithShift(c, wrapx, wrapy, doScroll);
-				}
-				else if(c == 7F) // DELETE
-				{
-				}
-				else if(c >= 0x80 && c <= 0xA0) // C1
-				{
-					// TODO
-					MT100.logger.info("parseChar, C1: " + c);
-				}
-			break;
-		}
+		while(repeat);
 	}
 }
 

@@ -38,97 +38,82 @@ exception statement from your version.
 
 package rainwarrior.mt100;
 
+import java.util.Map;
+import java.util.HashMap;
+import java.util.EnumSet;
 import org.lwjgl.input.Keyboard;
 
 public class Sym
 {
-	public enum C0
+	public class C0
 	{
-		NUL(0x00),
-		SOH(0x01), // (start of heading)
-		STX(0x02), // (start of text)
-		ETX(0x03), // (end of text)
-		EOT(0x04), // (end of transmission)
-		ENQ(0x05), // (enquiry)
-		ACK(0x06), // (acknowledge)
-		BEL(0x07), // '\a' (bell)
-		BS(0x08), //  '\b' (backspace)
-		HT(0x09), //  '\t' (horizontal tab)
-		LF(0x0A), //  '\n' (new line)
-		VT(0x0B), //  '\v' (vertical tab)
-		FF(0x0C), //  '\f' (form feed)
-		CR(0x0D), //  '\r' (carriage ret)
-		SO(0x0E), //  (shift out)
-		SI(0x0F), //  (shift in)
-		DLE(0x10), // (data link escape)
-		DC1(0x11), // (device control 1)
-		DC2(0x12), // (device control 2)
-		DC3(0x13), // (device control 3)
-		DC4(0x14), // (device control 4)
-		NAK(0x15), // (negative ack.)
-		SYN(0x16), // (synchronous idle)
-		ETB(0x17), // (end of trans. blk)
-		CAN(0x18), // (cancel)
-		EM(0x19), //  (end of medium)
-		SUB(0x1A), // (substitute)
-		ESC(0x1B), // (escape)
-		FS(0x1C), //  (file separator)
-		GS(0x1D), //  (group separator)
-		RS(0x1E), //  (record separator)
-		US(0x1F); //  (unit separator)
-		public final int val;
-		C0(int val)
-		{
-			this.val = val;
-		}
-		public int compareTo(int b)
-		{
-			return b - val;
-		}
+		public static final int NUL = 0x00;
+		public static final int SOH = 0x01; // (start of heading)
+		public static final int STX = 0x02; // (start of text)
+		public static final int ETX = 0x03; // (end of text)
+		public static final int EOT = 0x04; // (end of transmission)
+		public static final int ENQ = 0x05; // (enquiry)
+		public static final int ACK = 0x06; // (acknowledge)
+		public static final int BEL = 0x07; // '\a' (bell)
+		public static final int BS  = 0x08; //  '\b' (backspace)
+		public static final int HT  = 0x09; //  '\t' (horizontal tab)
+		public static final int LF  = 0x0A; //  '\n' (new line)
+		public static final int VT  = 0x0B; //  '\v' (vertical tab)
+		public static final int FF  = 0x0C; //  '\f' (form feed)
+		public static final int CR  = 0x0D; //  '\r' (carriage ret)
+		public static final int SO  = 0x0E; //  (shift out)
+		public static final int SI  = 0x0F; //  (shift in)
+		public static final int DLE = 0x10; // (data link escape)
+		public static final int DC1 = 0x11; // (device control 1)
+		public static final int DC2 = 0x12; // (device control 2)
+		public static final int DC3 = 0x13; // (device control 3)
+		public static final int DC4 = 0x14; // (device control 4)
+		public static final int NAK = 0x15; // (negative ack.)
+		public static final int SYN = 0x16; // (synchronous idle)
+		public static final int ETB = 0x17; // (end of trans. blk)
+		public static final int CAN = 0x18; // (cancel)
+		public static final int EM  = 0x19; //  (end of medium)
+		public static final int SUB = 0x1A; // (substitute)
+		public static final int ESC = 0x1B; // (escape)
+		public static final int FS  = 0x1C; //  (file separator)
+		public static final int GS  = 0x1D; //  (group separator)
+		public static final int RS  = 0x1E; //  (record separator)
+		public static final int US  = 0x1F; //  (unit separator)
 	}
-	public enum C1
+	public class C1
 	{
-//		--(0x80),
-//		--(0x81),
-		BPH(0x82),
-		NBH(0x83),
-//		--(0x84),
-		NEL(0x85),
-		SSA(0x86),
-		ESA(0x87),
-		HTS(0x88),
-		HTJ(0x89),
-		VTS(0x8A),
-		PLD(0x8B),
-		PLU(0x8C),
-		RI(0x8D),
-		SS2(0x8E),
-		SS3(0x8F),
-		DCS(0x90),
-		PU1(0x91),
-		PU2(0x92),
-		STS(0x93),
-		CCH(0x94),
-		MW(0x95),
-		SPA(0x96),
-		EPA(0x97),
-		SOS(0x98),
-//		--(0x99),
-		SCI(0x9A),
-		CSI(0x9B),
-		ST(0x9C),
-		OSC(0x9D),
-		PM(0x9E),
-		APC(0x9F);
-		public final int val;
-		C1(int val)
-		{
-			this.val = val;
-		}
-		public int compareTo(int b)
-		{
-			return b - val;
-		}
+//		public static final int --- = 0x80;
+//		public static final int --- = 0x81;
+		public static final int BPH = 0x82;
+		public static final int NBH = 0x83;
+//		public static final int --- = 0x84;
+		public static final int NEL = 0x85;
+		public static final int SSA = 0x86;
+		public static final int ESA = 0x87;
+		public static final int HTS = 0x88;
+		public static final int HTJ = 0x89;
+		public static final int VTS = 0x8A;
+		public static final int PLD = 0x8B;
+		public static final int PLU = 0x8C;
+		public static final int RI  = 0x8D;
+		public static final int SS2 = 0x8E;
+		public static final int SS3 = 0x8F;
+		public static final int DCS = 0x90;
+		public static final int PU1 = 0x91;
+		public static final int PU2 = 0x92;
+		public static final int STS = 0x93;
+		public static final int CCH = 0x94;
+		public static final int MW  = 0x95;
+		public static final int SPA = 0x96;
+		public static final int EPA = 0x97;
+		public static final int SOS = 0x98;
+//		public static final int --- = 0x99;
+		public static final int SCI = 0x9A;
+		public static final int CSI = 0x9B;
+		public static final int ST  = 0x9C;
+		public static final int OSC = 0x9D;
+		public static final int PM  = 0x9E;
+		public static final int APC = 0x9F;
 	}
 	public static int LWJGLToASCII(int key, boolean shift, boolean ctrl)
 	{
