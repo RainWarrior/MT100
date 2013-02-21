@@ -73,6 +73,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	QueueBuffer netOutput;
 	DropBuffer d;
 	public int tick = 0;
+	public boolean backlight = true;
 	@SideOnly(Side.CLIENT)
 
 	public TileEntityMT100()
