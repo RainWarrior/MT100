@@ -74,6 +74,7 @@ public class ScreenParser implements IReceiver, ITicker
 	int shift = 0;
 	State curState;
 	boolean wrapx = true, wrapy = true;
+	boolean doScroll = true;
 
 	@Override
 	public int capacity()
@@ -201,10 +202,12 @@ public class ScreenParser implements IReceiver, ITicker
 				else if(c < 0x30) // nF
 				{
 					// TODO
+					curState = State.GROUND;
 				}
 				else if(c < 0x40) // Fp, Private CF
 				{
 					// TODO
+					curState = State.GROUND;
 				}
 				else if(c < 0x60) // ESC Fe, C1
 				{
@@ -215,6 +218,7 @@ public class ScreenParser implements IReceiver, ITicker
 				else             // Fs, Single CF
 				{
 					// TODO
+					curState = State.GROUND;
 				}
 				break;
 			case GROUND:
@@ -225,7 +229,7 @@ public class ScreenParser implements IReceiver, ITicker
 				}
 				else if(c >= 0x20 && c < 0x7F)
 				{
-					screen.writeWithShift(c, wrapx, wrapy);
+					screen.writeWithShift(c, wrapx, wrapy, doScroll);
 				}
 				else if(c == 7F) // DELETE
 				{

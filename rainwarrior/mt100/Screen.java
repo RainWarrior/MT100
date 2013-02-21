@@ -57,7 +57,8 @@ public class Screen
 	public byte[] color; // RGBA background, RGBA foreground
 	protected boolean hasColor;
 	static byte[] ansiColor;
-	int x; int y;
+	int x=0; int y=0;
+	int scroll=0;
 	public int width;
 	public int height;
 	static boolean debug = true;
@@ -181,21 +182,23 @@ public class Screen
 		// TODO
 	}
 
-	public void writeWithShift(int b, boolean wrapx, boolean wrapy)
+	public void writeWithShift(int b, boolean wrapx, boolean wrapy, boolean doScroll)
 	{
 		if(x >= 0 && x < width && y >= 0 && y < width)
 		{
 			screen[x + y * width] = b;
 		}
 		x++;
-		if(x >= width && wrapx)
+		if(x == width && wrapx)
 		{
 			x = 0;
 			y++;
-		}
-		if(y >= height && wrapy)
-		{
-			y = 0;
+			if(y == height && wrapy) y = 0;
+			if(doScroll && y == scroll)
+			{
+				this.scroll++;
+				if(scroll >= height) scroll -= height;
+			}
 		}
 	}
 
@@ -226,8 +229,10 @@ public class Screen
 			{
 				GL11.glEnable(GL11.GL_TEXTURE_2D);
 			}
-			for(int i=0, k=pass * 4; i < height; i++)
+			for(int i=0, I=scroll,k=pass * 4 + scroll * width * 8; i < height; i++, I++)
 			{
+				if(I >= height) I -= height;
+				if(k >= width * height * 8) k -= width * height * 8;
 				for(int j=0; j < width; j++, k+=8)
 				{
 					x = j * cx;
@@ -243,7 +248,7 @@ public class Screen
 					}
 					else
 					{
-						c = screen[i * width + j];
+						c = screen[I * width + j];
 						if(debug) MT100.logger.info("c: " + c);
 						if(debug) MT100.logger.info("font: " + curFont.fontFile);
 						tmpFont = PstFontRegistry.getFont(c);
