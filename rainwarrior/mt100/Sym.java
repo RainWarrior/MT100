@@ -261,4 +261,25 @@ public class Sym
 		}
 		return 0;
 	}
+	public static Object[] ASCIIToLWJGL(int b)
+	{
+		int k = 0;
+		char c = 0;
+		if(b >= 0x20 && b < 0x7F)
+		{
+			k = LinuxKeycodes.mapKeySymToLWJGLKeyCode(b);
+			c = (char) b;
+		}
+		else
+		{
+			switch(b)
+			{
+				case 0x0D: k = Keyboard.KEY_RETURN; break;
+				case 0x08: k = Keyboard.KEY_BACK; break;
+				case 0x09: k = Keyboard.KEY_TAB; break;
+				case 0x1B: k = Keyboard.KEY_ESCAPE; break;
+			}
+		}
+		return new Object[]{ k, c };
+	}
 }

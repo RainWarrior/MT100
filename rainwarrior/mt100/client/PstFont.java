@@ -103,7 +103,7 @@ public class PstFont
 					header.order(ByteOrder.LITTLE_ENDIAN);
 					int version = header.getInt();
 					hoffset = header.getInt() - 32;
-					MT100.logger.info("hoffset: " + hoffset);
+					if(debug) MT100.logger.info("hoffset: " + hoffset);
 					int flags = header.getInt();
 					hasUni = ((flags & 0x01) != 0);
 					length = header.getInt();
@@ -118,13 +118,13 @@ public class PstFont
 				}
 				else
 				{
-					MT100.logger.severe("File " + fontFile + " is not a PSf file: " + b[0] + " " + b[1] + " " + b[2] + " " + b[3]);
+					if(debug) MT100.logger.severe("File " + fontFile + " is not a PSf file: " + b[0] + " " + b[1] + " " + b[2] + " " + b[3]);
 					throw new java.io.IOException();
 				}
-				MT100.logger.info("width: " + width);
-				MT100.logger.info("height: " + height);
-				MT100.logger.info("charsize: " + charsize);
-				MT100.logger.info("length: " + length);
+				if(debug) MT100.logger.info("width: " + width);
+				if(debug) MT100.logger.info("height: " + height);
+				if(debug) MT100.logger.info("charsize: " + charsize);
+				if(debug) MT100.logger.info("length: " + length);
 				ByteBuffer chars = ByteBuffer.allocate(length * charsize);
 				chars.order(ByteOrder.LITTLE_ENDIAN);
 				file.skipBytes(hoffset);
@@ -147,13 +147,13 @@ public class PstFont
 				byte bt;
 				for(int i=0; i < (1 << lShift); i++)
 				{
-//					MT100.logger.info("i: " + i + ", ^i: "+ ((i >> 4) + (i & 0xF) * (length >> 4)));
+//					if(debug) MT100.logger.info("i: " + i + ", ^i: "+ ((i >> 4) + (i & 0xF) * (length >> 4)));
 					for(int j=0; j < (length >> lShift); j++)
 					{
-//						MT100.logger.info("j: " + j + " " + (j * roundWidth) + " " + (i * charsize + j * roundWidth) + " " + ((i >> 4) * width + (i & 0xF) * 16 * width * height + j * 16 * width));
+//						if(debug) MT100.logger.info("j: " + j + " " + (j * roundWidth) + " " + (i * charsize + j * roundWidth) + " " + ((i >> 4) * width + (i & 0xF) * 16 * width * height + j * 16 * width));
 						for(int k=0; k < height; k++)
 						{
-//							MT100.logger.info("k: " + k);
+//							if(debug) MT100.logger.info("k: " + k);
 							for(int l=0; l < width; l++)
 							{
 								bt = (byte)(((chars.get((i * (length >> lShift) + j) * charsize + k * roundWidth + (l >> 3)) & (1 << (7 - (l & 7)))) != 0) ? 0xFF : 0x00);
@@ -241,7 +241,7 @@ public class PstFont
 									shift = 0;
 									c = sep;
 								}
-								MT100.logger.info("c: " + c + ", sep: " + sep + ", shift: " + shift);
+								if(debug) MT100.logger.info("c: " + c + ", sep: " + sep + ", shift: " + shift);
 								while(shift-- > 0)
 								{
 									sep = file.readByte();
@@ -261,7 +261,7 @@ public class PstFont
 							{
 								PstFontRegistry.fontMap.put(c, this);
 								PstFontRegistry.indexMap.put(c, i);
-								MT100.logger.info("c: " + c + ", sep: " + sep + ", i: " + i);
+								if(debug) MT100.logger.info("c: " + c + ", sep: " + sep + ", i: " + i);
 							}
 						}
 					}
@@ -279,13 +279,14 @@ public class PstFont
 			}
 			else
 			{
-				MT100.logger.info("No font file!");
+				MT100.logger.warning("No font file!");
 			}
 		}
 		catch(java.io.IOException e)
 		{
 			throw new RuntimeException(e);
 		}
+		debug = false;
 	}
 	public void bindFontTexture()
 	{

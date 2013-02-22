@@ -73,7 +73,7 @@ public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	@Override
 	public void update()
 	{
-		if(!buffer.isEmpty())
+		if(!buffer.isEmpty() && !recs.isEmpty())
 		{
 			ReceiverHelper.updateFromQueue(recs, buffer);
 		}

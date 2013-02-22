@@ -34,6 +34,7 @@ import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.HashSet;
+import lombok.Delegate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.entity.player.EntityPlayer;
@@ -46,6 +47,7 @@ import net.minecraft.network.INetworkManager;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.SideOnly;
 import cpw.mods.fml.relauncher.Side;
+
 import rainwarrior.mt100.client.GuiMT100;
 import rainwarrior.mt100.client.PstFontRegistry;
 
@@ -58,11 +60,14 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	public Screen screen;
 	public ScreenParser screenParser;
 	boolean isServer;
-//	@SideOnly(Side.SERVER)
+
+	@Delegate(types=IReceiver.class)
 	QueueBuffer input;
+	@Delegate(types=ISender.class)
 	public QueueBuffer netInput;
 	QueueBuffer netOutput;
 	DropBuffer d;
+
 	public int tick = 0;
 	public boolean backlight = true;
 	@SideOnly(Side.CLIENT)
@@ -85,9 +90,9 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 			input.connect(screenParser);
 			input.connect(netOutput);
 			// ECHO
-			d = new DropBuffer(true);
-			netInput.connect(d);
-			d.connect(input);
+//			d = new DropBuffer(true);
+//			netInput.connect(d);
+//			d.connect(input);
 		}
 		else
 		{
@@ -171,35 +176,5 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 			netOutput.buffer.clear();
 		}
 //		MT100.logger.info("update_2!: " + FMLCommonHandler.instance().getEffectiveSide() + netInput.buffer.size() + " " + netOutput.buffer.size() + " " + screen.buffer.buffer.size());
-	}
-
-	@Override
-	public int capacity()
-	{
-		return input.capacity();
-	}
-
-	@Override
-	public int receive(Iterator<Byte> data)
-	{
-		return input.receive(data);
-	}
-
-	@Override
-	public boolean connected(IReceiver rec)
-	{
-		return netInput.connected(rec);
-	}
-
-	@Override
-	public boolean connect(IReceiver rec)
-	{
-		return netInput.connect(rec);
-	}
-
-	@Override
-	public boolean disconnect(IReceiver rec)
-	{
-		return netInput.disconnect(rec);
 	}
 }

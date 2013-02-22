@@ -48,13 +48,14 @@ public class Screen
 	public byte[] color; // RGBA background, RGBA foreground
 	protected boolean hasColor;
 	static byte[] ansiColor;
-	int x=0; int y=0;
+	public int x=0;
+	public int y=0;
 	int scroll=0;
 	public int width;
 	public int height;
 	boolean wrapx = true, wrapy = true;
 	boolean doScroll = true;
-	static boolean debug = true;
+	static boolean debug = false;
 
 	static
 	{ // probably can generate by simple loop

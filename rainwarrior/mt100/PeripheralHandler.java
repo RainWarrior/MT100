@@ -29,23 +29,24 @@ of this Program grant you additional permission to convey the resulting work.
 
 package rainwarrior.mt100;
 
-public class Reference
+import net.minecraft.tileentity.TileEntity;
+
+import dan200.computer.api.IPeripheral;
+import dan200.computer.api.IPeripheralHandler;
+import dan200.computer.api.IHostedPeripheral;
+import dan200.computer.api.IComputerAccess;
+
+public class PeripheralHandler implements IPeripheralHandler
 {
-	public static final String MOD_ID               = "MT100";
-	public static final String MOD_NAME             = "MT100 Terminal Emulator";
-	public static final String CHANNEL_NAME         = MOD_ID;
-	public static final String SERVER_PROXY_CLASS   = "rainwarrior.mt100.CommonProxy";
-	public static final String CLIENT_PROXY_CLASS   = "rainwarrior.mt100.client.ClientProxy";
-	public static final int    QUEUE_SIZE           = 4096;
-	public static final int    PACKET_SIZE          = 16384;
-	public static final int    QUOTA                = 115200 / 20;
-	public static final int    NET_QUOTA            = 115200 / 20;
-	public static final int    SCREEN_UPDATE_QUOTA  = 115200 / 20;
-	public static final int    CC_EVENT_QUOTA       = 115200 / 20;
-	public static final byte   PACKET_CONNECT       = 0;
-	public static final byte   PACKET_TILE_REQUEST  = 1;
-	public static final byte   PACKET_TILE_RESPONSE = 2;
-	public static final byte   PACKET_DATA          = 1;
-	public static final long   TYPEMATIC_DELAY      = 500;
-	public static final long   TYPEMATIC_SPEED      = 20;
+	public IHostedPeripheral getPeripheral( TileEntity te)
+	{
+		if(te instanceof TileEntityMT100)
+		{
+			TileEntityMT100 t = (TileEntityMT100)te;
+			PeripheralUART uart = new PeripheralUART(t.screen);
+			t.connect(uart);
+			uart.connect(t);
+		}
+		return null;
+	}
 }

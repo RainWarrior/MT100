@@ -30,8 +30,10 @@ of this Program grant you additional permission to convey the resulting work.
 package rainwarrior.mt100;
 
 import java.util.logging.Logger;
+import java.lang.reflect.Method;
 import net.minecraftforge.common.MinecraftForge;
 import cpw.mods.fml.common.FMLCommonHandler;
+import cpw.mods.fml.common.Loader;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.Instance;
 import cpw.mods.fml.common.Mod.PreInit;
@@ -61,7 +63,7 @@ import rainwarrior.mt100.TileEntityMT100;
 //@NetworkMod(clientSideRequired = true, serverSideRequired = false)
 public class MT100 // extends BaseMod
 {
-	public static final int  blockId = 500;
+	public static final int  blockId = 499;
 
 	@Instance(Reference.MOD_ID/*"rainwarrior_MT100"*/)
 	public static MT100 instance;
@@ -71,7 +73,7 @@ public class MT100 // extends BaseMod
 
 	public static final Block blockMT100 = new BlockMT100(blockId, 16, Material.ground);
 
-	public static final Logger logger = Logger.getLogger(Reference.MOD_ID);
+	public static Logger logger;
 //	public static Logger logger2;
 
 	public static final TickHandler clientTickHandler = new TickHandler(false);
@@ -82,7 +84,7 @@ public class MT100 // extends BaseMod
 	@PreInit
 	public void preInit(FMLPreInitializationEvent event)
 	{
-//		logger2 = event.getModLog();
+		logger = event.getModLog();
 //		logger.info("first:  " + logger);
 //		logger.info("second: " + logger2);
 	}
@@ -107,6 +109,26 @@ public class MT100 // extends BaseMod
 	@PostInit
 	public void postInit(FMLPostInitializationEvent event)
 	{
+		try
+		{
+			Class ccapi = Class.forName("dan200.computer.api.ComputerCraftAPI");
+			Class handler = Class.forName("dan200.computer.api.IPeripheralHandler");
+			try
+			{
+				Method m = ccapi.getMethod("registerExternalPeripheral", new Class[]{ Class.class, handler });
+				m.invoke(null, TileEntityMT100.class, new PeripheralHandler());
+				MT100.logger.info("CC found");
+			}
+			catch(Exception e)
+			{
+				MT100.logger.warning("MT100 can't work with this version of Computer Craft: " + e);
+			}
+		}
+		catch(ClassNotFoundException e)
+		{
+			MT100.logger.info("CC not found");
+			// should still work fine
+		}
 		MT100.logger.info("Copyright (C) 2012 RainWarrior");
 		MT100.logger.info("License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.");
 		MT100.logger.info("MT100 is free software: you are free to change and redistribute it.");

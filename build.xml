@@ -73,6 +73,7 @@
 	<target name="reobf" depends="compile">
 		<exec executable="python" dir=".">
 			<arg value="runtime/reobfuscate.py" />
+			<arg value="--client" />
 		</exec>
 	</target>
 
