@@ -17,22 +17,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with MT100. If not, see <http://www.gnu.org/licenses/>.
 
-Linking this software statically or dynamically with other modules is
-making a combined work based on this software.  Thus, the terms and
-conditions of the GNU General Public License cover the whole
-combination.
+Additional permission under GNU GPL version 3 section 7
 
-As a special exception, the copyright holders of this software give you
-permission to link this software with independent modules to produce an
-executable, regardless of the license terms of these independent
-modules, and to copy and distribute the resulting executable under
-terms of your choice, provided that you also meet, for each linked
-independent module, the terms and conditions of the license of that
-module.  An independent module is a module which is not derived from
-or based on this software.  If you modify this software, you may extend
-this exception to your version of the software, but you are not
-obligated to do so.  If you do not wish to do so, delete this
-exception statement from your version.
+If you modify this Program, or any covered work, by linking or combining it
+with Minecraft and/or MinecraftForge (or a modified version of Minecraft
+and/or Minecraft Forge), containing parts covered by the terms of
+Minecraft Terms of Use and/or Minecraft Forge Public Licence, the licensors
+of this Program grant you additional permission to convey the resulting work.
 
 */
 
