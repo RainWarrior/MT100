@@ -43,9 +43,13 @@ public class PeripheralHandler implements IPeripheralHandler
 		if(te instanceof TileEntityMT100)
 		{
 			TileEntityMT100 t = (TileEntityMT100)te;
-			PeripheralUART uart = new PeripheralUART(t.screen);
-			t.connect(uart);
-			uart.connect(t);
+			if(t.uart == null)
+			{
+				t.uart = new PeripheralUART(t.screen);
+				t.connect(t.uart);
+				t.uart.connect(t);
+			}
+			return t.uart;
 		}
 		return null;
 	}

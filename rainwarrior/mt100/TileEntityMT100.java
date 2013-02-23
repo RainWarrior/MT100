@@ -60,6 +60,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	public Screen screen;
 	public ScreenParser screenParser;
 	boolean isServer;
+	public PeripheralUART uart = null;
 
 	@Delegate(types=IReceiver.class)
 	QueueBuffer input;
@@ -159,6 +160,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		if(isServer)
 		{
 //			MT100.logger.info(" " + input.buffer.size());
+			if(uart != null) uart.update();
 			input.update();
 //			MT100.logger.info(" " + input.buffer.size());
 		}
