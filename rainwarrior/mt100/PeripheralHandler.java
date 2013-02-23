@@ -31,6 +31,8 @@ package rainwarrior.mt100;
 
 import net.minecraft.tileentity.TileEntity;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+
 import dan200.computer.api.IPeripheral;
 import dan200.computer.api.IPeripheralHandler;
 import dan200.computer.api.IHostedPeripheral;
@@ -38,8 +40,12 @@ import dan200.computer.api.IComputerAccess;
 
 public class PeripheralHandler implements IPeripheralHandler
 {
-	public IHostedPeripheral getPeripheral( TileEntity te)
+	public IHostedPeripheral getPeripheral(TileEntity te)
 	{
+		if(!FMLCommonHandler.instance().getEffectiveSide().isServer())
+		{
+			throw new RuntimeException("cleint peripheral calls");
+		}
 		if(te instanceof TileEntityMT100)
 		{
 			TileEntityMT100 t = (TileEntityMT100)te;

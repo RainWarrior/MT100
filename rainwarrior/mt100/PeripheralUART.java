@@ -36,6 +36,8 @@ import lombok.Delegate;
 
 import net.minecraft.nbt.NBTTagCompound;
 
+import cpw.mods.fml.common.FMLCommonHandler;
+
 import dan200.computer.api.IHostedPeripheral;
 import dan200.computer.api.IComputerAccess;
 
@@ -81,12 +83,16 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 	public void readFromNBT(NBTTagCompound cmp)
 	{
 		// TODO
+		boolean isServer = FMLCommonHandler.instance().getEffectiveSide().isServer();
+		MT100.logger.info("UART readFromNBT, isServer: " + isServer);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound cmp)
 	{
 		// TODO
+		boolean isServer = FMLCommonHandler.instance().getEffectiveSide().isServer();
+		MT100.logger.info("UART writeToNBT, isServer: " + isServer);
 	}
 
 	// IPeripheral
@@ -202,7 +208,9 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 	@Override
 	public synchronized boolean canAttachToSide(int side)
 	{
-		return updater.get(this) == null;
+		boolean ret = updater.get(this) == null;
+		MT100.logger.info("CanAttach: " + ret);
+		return ret;
 	}
 
 	@Override
@@ -227,6 +235,7 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 	@Override
 	public void update()
 	{
+//		MT100.logger.info("Per.update");
 		input.update();
 		if(computer != null && !output.buffer.isEmpty())
 		{

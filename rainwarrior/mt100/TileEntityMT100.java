@@ -160,7 +160,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		if(isServer)
 		{
 //			MT100.logger.info(" " + input.buffer.size());
-			if(uart != null) uart.update();
+//			if(uart != null) uart.update();
 			input.update();
 //			MT100.logger.info(" " + input.buffer.size());
 		}
