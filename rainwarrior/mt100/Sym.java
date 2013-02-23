@@ -89,7 +89,7 @@ public class Sym
 		public static final int RI  = 0x8D;
 		public static final int SS2 = 0x8E;
 		public static final int SS3 = 0x8F;
-		public static final int DCS = 0x90;
+		public static final int DCS = 0x90; // DEVICE CONTROL STRING
 		public static final int PU1 = 0x91;
 		public static final int PU2 = 0x92;
 		public static final int STS = 0x93;
@@ -97,14 +97,22 @@ public class Sym
 		public static final int MW  = 0x95;
 		public static final int SPA = 0x96;
 		public static final int EPA = 0x97;
-		public static final int SOS = 0x98;
+		public static final int SOS = 0x98; // START OF STRING
 //		public static final int --- = 0x99;
 		public static final int SCI = 0x9A;
 		public static final int CSI = 0x9B;
-		public static final int ST  = 0x9C;
-		public static final int OSC = 0x9D;
-		public static final int PM  = 0x9E;
-		public static final int APC = 0x9F;
+		public static final int ST  = 0x9C; // STRING TERMINATOR
+		public static final int OSC = 0x9D; // OPERATING SYSTEM COMMAND
+		public static final int PM  = 0x9E; // PRIVACY MESSAGE
+		public static final int APC = 0x9F; // APPLICATION PROGRAM COMMAND
+	}
+	public class CS
+	{
+		public static final int CUU = 0x41; // CUSROR UP
+		public static final int CUD = 0x42; // CUSROR DOWN
+		public static final int CUF = 0x43; // CUSROR RIGHT
+		public static final int CUB = 0x44; // CUSROR LEFT
+		public static final int HVP = 0x66; // CHARACTER AND LINE POSITION
 	}
 	public static int LWJGLToASCII(int key, boolean shift, boolean ctrl)
 	{
@@ -117,7 +125,7 @@ public class Sym
 			case Keyboard.KEY_ESCAPE:		return 0x1B;
 
 			// numeric
-			case Keyboard.KEY_0:			return shift ? 0x28 : 0x30;
+			case Keyboard.KEY_0:			return shift ? 0x29 : 0x30;
 			case Keyboard.KEY_1:			return shift ? 0x21 : 0x31;
 			case Keyboard.KEY_2:			return shift ? 0x32 : 0x32; // !
 			case Keyboard.KEY_3:			return shift ? 0x23 : 0x33;

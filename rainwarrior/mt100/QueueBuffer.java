@@ -71,7 +71,7 @@ public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	}
 
 	@Override
-	public void update()
+	public synchronized void update()
 	{
 		if(!buffer.isEmpty() && !recs.isEmpty())
 		{
@@ -86,7 +86,7 @@ public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	}
 
 	@Override
-	public int receive(Iterator<Byte> data)
+	public synchronized int receive(Iterator<Byte> data)
 	{
 		int ret = ReceiverHelper.receiveIntoQueue(buffer, data, quota);
 		//update();

@@ -95,7 +95,8 @@ public class Screen
 		}
 		for(int i=0; i < width * height; i++)
 		{
-			screen[i] = (i & 0xFF);
+			screen[i] = 0;
+//			screen[i] = (i & 0xFF);
 		}
 		resetColors_ARGB(0xFF000000, 0xFFFFFFFF);
 	}
@@ -112,7 +113,7 @@ public class Screen
 		{
 			for(int i=0; i < width * height * 8; i+=8)
 			{
-				for(int j=0; j < 4; j++)
+/*				for(int j=0; j < 4; j++)
 				{
 					color[i + j] = ansiColor[(i & 0x38) >> 1 | j];
 //					color[i + j] = (byte)0x00;
@@ -121,7 +122,7 @@ public class Screen
 				for(int j=0; j < 4; j++)
 				{
 					color[i + 4 + j] = ansiColor[(((i + 24) & 0x38) >> 1 | j) + 0x20];
-				}
+				}*/
 /*				color[i + 0] = (byte)(i & 0xFF);
 				color[i + 1] = (byte)(i & 0xFF);
 				color[i + 2] = (byte)(i & 0xFF);
@@ -130,14 +131,14 @@ public class Screen
 				color[i + 5] = (byte)((i + 0x8F) & 0xFF);
 				color[i + 6] = (byte)((i + 0x8F) & 0xFF);
 				color[i + 7] = (byte)(0xFF);*/
-/*				color[i + 0] = (byte)bR;
+				color[i + 0] = (byte)bR;
 				color[i + 1] = (byte)bG;
 				color[i + 2] = (byte)bB;
 				color[i + 3] = (byte)bA;
 				color[i + 4] = (byte)fR;
 				color[i + 5] = (byte)fG;
 				color[i + 6] = (byte)fB;
-				color[i + 7] = (byte)fA;*/
+				color[i + 7] = (byte)fA;
 			}
 		}
 		else
@@ -178,7 +179,7 @@ public class Screen
 
 	public void writeWithShift(int b)
 	{
-		if(x >= 0 && x < width && y >= 0 && y < width)
+		if(x >= 0 && x < width && y >= 0 && y < height)
 		{
 			screen[x + y * width] = b;
 		}

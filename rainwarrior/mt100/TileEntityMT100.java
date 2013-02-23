@@ -63,11 +63,13 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	public PeripheralUART uart = null;
 
 	@Delegate(types=IReceiver.class)
-	QueueBuffer input;
+	public QueueBuffer input;
 	@Delegate(types=ISender.class)
 	public QueueBuffer netInput;
 	QueueBuffer netOutput;
 	DropBuffer d;
+
+	public Object updateLock = new Object();
 
 	public int tick = 0;
 	public boolean backlight = true;
@@ -79,7 +81,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	}
 	public TileEntityMT100(boolean isServer)
 	{
-		screen = new Screen(80, 48, true);
+		screen = new Screen(40, 24, true);
 		screenParser = new ScreenParser(screen);
 		netInput = new QueueBuffer(Reference.PACKET_SIZE, true);
 		netOutput = new QueueBuffer(Reference.PACKET_SIZE * 2, Reference.NET_QUOTA, true);
@@ -97,9 +99,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		}
 		else
 		{
-			d = new DropBuffer(true);
-			netInput.connect(d);
-			d.connect(screenParser);
+			netInput.connect(screenParser);
 		}
 //		MT100.logger.info("new TileEntityMT100, side: " + FMLCommonHandler.instance().getEffectiveSide());
 	}
@@ -154,29 +154,32 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	@Override
 	public void updateEntity()
 	{
-//		MT100.logger.info("update!: " + FMLCommonHandler.instance().getEffectiveSide() + netInput.buffer.size() + " " + netOutput.buffer.size() + " " + screen.buffer.buffer.size());
-		if(tick++ >= 26) tick = 0;
-		netInput.update();
-		if(isServer)
+		synchronized(updateLock)
 		{
-//			MT100.logger.info(" " + input.buffer.size());
-//			if(uart != null) uart.update();
-			input.update();
-//			MT100.logger.info(" " + input.buffer.size());
-		}
-		else
-		{
-			if(curGui != null)
+//			MT100.logger.info("update!: " + FMLCommonHandler.instance().getEffectiveSide() + netInput.buffer.size() + " " + netOutput.buffer.size() + " " + screen.buffer.buffer.size());
+			if(tick++ >= 26) tick = 0;
+			netInput.update();
+			if(isServer)
 			{
-				curGui.update();
+//				MT100.logger.info(" " + input.buffer.size());
+//				if(uart != null) uart.update();
+				input.update();
+//				MT100.logger.info(" " + input.buffer.size());
 			}
+			else
+			{
+				if(curGui != null)
+				{
+					curGui.update();
+				}
+			}
+			screenParser.update();
+			if(!netOutput.buffer.isEmpty())
+			{
+				PacketHandler.sendTileData(this, netOutput.buffer);
+				netOutput.buffer.clear();
+			}
+//			MT100.logger.info("update_2!: " + FMLCommonHandler.instance().getEffectiveSide() + netInput.buffer.size() + " " + netOutput.buffer.size() + " " + screen.buffer.buffer.size());
 		}
-		screenParser.update();
-		if(!netOutput.buffer.isEmpty())
-		{
-			PacketHandler.sendTileData(this, netOutput.buffer);
-			netOutput.buffer.clear();
-		}
-//		MT100.logger.info("update_2!: " + FMLCommonHandler.instance().getEffectiveSide() + netInput.buffer.size() + " " + netOutput.buffer.size() + " " + screen.buffer.buffer.size());
 	}
 }

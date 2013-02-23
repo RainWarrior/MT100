@@ -41,17 +41,23 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import dan200.computer.api.IHostedPeripheral;
 import dan200.computer.api.IComputerAccess;
 
+import rainwarrior.mt100.Sym.C0;
+import rainwarrior.mt100.Sym.C1;
+import rainwarrior.mt100.Sym.CS;
+
 public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, ITicker
 {
 	@Delegate(types=ISender.class)
-	QueueBuffer input = new QueueBuffer(); // cc -> UART
+	QueueBuffer output = new QueueBuffer(); // CC -> UART
 	@Delegate(types=IReceiver.class)
-	QueueBuffer output = new QueueBuffer(); // UART -> CC
+	QueueBuffer input = new QueueBuffer(); // UART -> CC
 
 	volatile IComputerAccess computer = null;
 	static final AtomicReferenceFieldUpdater<PeripheralUART, IComputerAccess> updater = AtomicReferenceFieldUpdater.newUpdater(PeripheralUART.class, IComputerAccess.class, "computer");
 
-	Screen screen;
+	Object callLock = new Object();
+
+	TileEntityMT100 te;
 
 	static final String[] methodNames = new String[]{
 		"write",
@@ -72,10 +78,12 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		"setBackgroundColour",
 	};
 
-	public PeripheralUART(Screen screen)
+	public PeripheralUART(TileEntityMT100 te)
 	{
 		MT100.logger.info("Per created!");
-		this.screen = screen;
+		this.te = te;
+//		te.connect(this.input);
+//		this.output.connect(te);
 	}
 
 	// IHostedPeripheral
@@ -135,20 +143,18 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 	 * @see 	#getMethodNames
 	 */
 	@Override
-	public Object[] callMethod(IComputerAccess computer, int method, Object[] args) throws Exception
+	public synchronized Object[] callMethod(IComputerAccess computer, int method, Object[] args) throws Exception
 	{
 		if(computer != updater.get(this)) return null;
+		String str = null;
 		if(methodNames[method] == "write")
 		{
 			MT100.logger.info("Per.write: " + args[0]);
-			String str = (String)args[0];
-			ArrayList<Byte> data = new ArrayList<Byte>(str.length());
+			str = (String)args[0];
 			for(int i=0; i < str.length(); i++)
 			{
 				if((int)str.charAt(i) > 0x100) MT100.logger.info("Per.write, long character: " + str.charAt(i));
-				data.add((byte) str.charAt(i));
 			}
-			input.receive(data.iterator());
 		}
 		else if(methodNames[method] == "clear")
 		{
@@ -162,15 +168,15 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		}
 		else if(methodNames[method] == "getCursorPos")
 		{
-			MT100.logger.info("Per.getCursorPos");
-			return new Object[]{ screen.x, screen.y };
+			MT100.logger.info("Per.getCursorPos: " + te.screen.x + " " + te.screen.y);
+			return new Object[]{ te.screen.x, te.screen.y};
 		}
 		else if(methodNames[method] == "setCursorPos")
 		{
-//			screen.x = (Integer)args[0];
-//			screen.y = (Integer)args[1];
-			// TODO send, should go to both screens
-			MT100.logger.info("Per.setCursorPos");
+			int x = ((Double)args[0]).intValue();
+			int y = ((Double)args[1]).intValue();
+			str = "" + (char)C1.CSI + (x + 1) + ";" + (y + 1) + (char)CS.HVP;
+			MT100.logger.info("Per.setCursorPos: " + x + " " + y);
 		}
 		else if(methodNames[method] == "setCursorBlink")
 		{
@@ -183,7 +189,7 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		}
 		else if(methodNames[method] == "getSize")
 		{
-			return new Object[]{ screen.width, screen.height };
+			return new Object[]{ te.screen.width, te.screen.height };
 		}
 		else if(methodNames[method] == "scroll")
 		{
@@ -202,14 +208,31 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		{
 			MT100.logger.warning("Per, unimplemented method: " + methodNames[method]);
 		}
+		if(str != null)
+		{
+			synchronized(te.updateLock)
+			{
+				byte[] b = str.getBytes("UTF-8");
+				ArrayList<Byte> data = new ArrayList<Byte>(b.length);
+				for(int i=0; i < b.length; i++)
+				{
+					data.add(b[i]);
+				}
+				this.output.receive(data.iterator());
+				this.output.update();
+				// hack, because otherwise state will be incorrect
+				this.te.input.update();
+				this.te.screenParser.update();
+			}
+		}
 		return null;
 	}
     
 	@Override
-	public synchronized boolean canAttachToSide(int side)
+	public boolean canAttachToSide(int side)
 	{
 		boolean ret = updater.get(this) == null;
-		MT100.logger.info("CanAttach: " + ret);
+		MT100.logger.info("CanAttach: " + ret + FMLCommonHandler.instance().getEffectiveSide());
 		return ret;
 	}
 
@@ -236,8 +259,8 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 	public void update()
 	{
 //		MT100.logger.info("Per.update");
-		input.update();
-		if(computer != null && !output.buffer.isEmpty())
+		output.update();
+		if(computer != null && !input.buffer.isEmpty())
 		{
 			try
 			{
@@ -246,9 +269,9 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 				byte b;
 				Integer k;
 				Character c;
-				while(!output.buffer.isEmpty() && quota != 0)
+				while(!input.buffer.isEmpty() && quota != 0)
 				{ // directly passing UTF-8 to Lua
-					b = output.buffer.take();
+					b = input.buffer.take();
 					t = Sym.ASCIIToLWJGL(b);
 					k = (Integer)t[0];
 					c = (Character)t[1];

@@ -39,6 +39,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 import net.minecraft.nbt.NBTTagCompound;
 import rainwarrior.mt100.Sym.C0;
 import rainwarrior.mt100.Sym.C1;
+import rainwarrior.mt100.Sym.CS;
 
 public class ScreenParser implements IReceiver, ITicker
 {
@@ -65,7 +66,8 @@ public class ScreenParser implements IReceiver, ITicker
 	int shift = 0;
 	State curState;
 	long csiInters = 0;
-	long csiParams = 0;
+	int csiINum = 0;
+	StringBuffer csiParams = new StringBuffer();
 
 	@Override
 	public int capacity()
@@ -198,7 +200,8 @@ public class ScreenParser implements IReceiver, ITicker
 					case C1.CSI:
 						curState = State.CSI_PARAM;
 						csiInters = 0;
-						csiParams = 0;
+						csiINum = 0;
+						csiParams.delete(0, csiParams.length());
 						break;
 				}
 			}
@@ -248,8 +251,7 @@ public class ScreenParser implements IReceiver, ITicker
 					case CSI_PARAM:
 						if(c >= 0x30 && c < 0x40)
 						{
-							csiParams <<= 4;
-							csiParams |= (c & 0xF);
+							csiParams.append((char)c);
 						}
 						else
 						{
@@ -262,6 +264,7 @@ public class ScreenParser implements IReceiver, ITicker
 						{
 							csiInters <<= 4;
 							csiInters |= (c & 0xF);
+							csiINum++;
 						}
 						else
 						{
@@ -276,18 +279,22 @@ public class ScreenParser implements IReceiver, ITicker
 							MT100.logger.info("CSI: P: " + csiParams + ", I: " + csiInters + ", F: " + c);
 							switch(c) // TODO move by n, not by 1
 							{
-								case 0x41: // CUU - CURSOR UP
+								case CS.CUU: // CURSOR UP
 									screen.moveUpWithShift();
 									break;
-								case 0x42: // CUD - CURSOR DOWN
+								case CS.CUD: // CURSOR DOWN
 									screen.moveDownWithShift();
 									break;
-								case 0x43: // CUF - CURSOR RIGHT
+								case CS.CUF: // CURSOR RIGHT
 									screen.moveRightWithShift();
 									break;
-								case 0x44: // CUB - CURSOR LEFT
+								case CS.CUB: // CURSOR LEFT
 									screen.moveLeftWithShift();
 									break;
+								case CS.HVP: // CHARACTER AND LINE POSITION
+									int[] coords = parseCSIParams(new int[]{ 1, 1 });
+									screen.x = coords[0] - 1;
+									screen.y = coords[1] - 1;
 							}
 							curState = State.GROUND;
 						}
@@ -301,6 +308,28 @@ public class ScreenParser implements IReceiver, ITicker
 			}
 		}
 		while(repeat);
+	}
+	int[] parseCSIParams(int[] defs)
+	{
+		String[] ps = csiParams.toString().split(String.valueOf((char)0x3B)); // ;
+		int[] ret = new int[defs.length];
+		try
+		{
+			for(int i=0; i < ps.length; i++)
+			{
+				ret[i] = ((ps[i] == "") ? defs[i] : Integer.parseInt(ps[i]));
+			}
+			for(int i = ps.length; i < defs.length; i++)
+			{
+				ret[i] = defs[i];
+			}
+			return ret;
+		}
+		catch(NumberFormatException e)
+		{
+			MT100.logger.warning("Error parsing CSI Parameters");
+			return null;
+		}
 	}
 }
 
