@@ -132,28 +132,26 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		}
 		else if(methodNames[method] == "clear")
 		{
-			str = "" + 2 + CS.ED;
+			str = "" + (char)C1.CSI + 2 + (char)CS.ED;
 			MT100.logger.info("Per.clear");
 		}
 		else if(methodNames[method] == "clearLine")
 		{
-			str = "" + 2 + CS.EL;
+			str = "" + (char)C1.CSI + 2 + (char)CS.EL;
 			MT100.logger.info("Per.clearLine");
 		}
 		else if(methodNames[method] == "getCursorPos")
 		{
 			// TODO maybe switch to DSR and blocking, or store local copy
-			int y = te.screen.y - te.screen.scroll;
-			if(y < 0) y += te.screen.height;
-			MT100.logger.info("Per.getCursorPos: " + te.screen.x + " " + y);
-			return new Object[]{ te.screen.x, y};
+//			MT100.logger.info("Per.getCursorPos: " + te.screen.getX() + " " + te.screen.getY());
+			return new Object[]{ te.screen.getX() + 1, te.screen.getY() + 1};
 		}
 		else if(methodNames[method] == "setCursorPos")
 		{
 			int x = ((Double)args[0]).intValue();
 			int y = ((Double)args[1]).intValue();
-			str = "" + (char)C1.CSI + (x + 1) + ";" + (y + 1) + (char)CS.HVP;
-			MT100.logger.info("Per.setCursorPos: " + x + " " + y);
+			str = "" + (char)C1.CSI + x + ";" + y + (char)CS.HVP;
+//			MT100.logger.info("Per.setCursorPos: " + x + " " + y);
 		}
 		else if(methodNames[method] == "setCursorBlink")
 		{
@@ -180,26 +178,24 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		{
 			int c = ((Double)args[0]).intValue();
 			boolean b = false;
-			if(c >= 0x100)
+			int oldc = c;
+			int rc = 15;
+			while((c >>= 1) > 0) rc--;
+			if(rc >= 8)
 			{
 				b = true;
-				c >>= 8;
+				rc -= 8;
 			}
-			int rc = 1;
-			while((c >>= 1) != 0) rc <<= 1;
 			boolean f = (methodNames[method].charAt(3) == 'T');
 			if(f)
 			{
-				str = "" + (char)C1.CSI + (rc + 30) + ";" + (b ? 1 : 22) + (char)CS.SGR;
+				str = "" + (char)C1.CSI + (b ? 1 : 22) + ";" + (rc + 30) + (char)CS.SGR;
 			}
 			else
 			{
 				str = "" + (char)C1.CSI + (rc + 40) + (char)CS.SGR;
 			}
-		}
-		else if(methodNames[method] == "setBackgroundColor" || methodNames[method] == "setBackgroundColour")
-		{
-			int c = ((Double)args[0]).intValue();
+//			MT100.logger.info("Color: " + oldc + " " + c + " " + b + " " + rc + " " + f);
 		}
 		else
 		{

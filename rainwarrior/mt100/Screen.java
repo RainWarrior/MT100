@@ -53,8 +53,8 @@ public class Screen
 	public boolean curFBold = false;
 	protected boolean hasColor;
 	static byte[] ansiColor;
-	public int x=0;
-	public int y=0;
+	private int x=0;
+	private int y=0;
 	int scroll=0;
 	public int width;
 	public int height;
@@ -233,14 +233,15 @@ public class Screen
 		clearLine(p, y);
 	}
 
-	public void clearLine(int p, int y)
+	public void clearLine(int p, int Y)
 	{
-		if(p != 0) for(int i = 0; i <= Math.min(x, width - 1); i++) erase(y);
-		if(p != 1) for(int i = Math.max(0, x); i < width; i++) erase(y);
+		if(p != 0) for(int i = 0; i <= Math.min(x, width - 1); i++) erase(i, Y);
+		if(p != 1) for(int i = Math.max(0, x); i < width; i++) erase(i, Y);
 	}
 
 	public void clearScreen(int p)
 	{
+		MT100.logger.info("clearScreen: " + p);
 		clearLine(p);
 		int i = scroll;
 		boolean passed = false;
@@ -249,11 +250,14 @@ public class Screen
 			if(i == y)
 			{
 				passed = true;
-				continue;
 			}
-			if(p != 0 && !passed) clearLine(2);
-			if(p != 1 && passed) clearLine(2);
+			else
+			{
+				if(p != 0 && !passed) clearLine(2, i);
+				if(p != 1 && passed) clearLine(2, i);
+			}
 			i++;
+			if(i >= height) i -= height;
 		}
 		while(i != scroll);
 	}
@@ -318,20 +322,20 @@ public class Screen
 
 	public void erase()
 	{
-		erase(y);
+		erase(x, y);
 	}
 
-	public void erase(int y)
+	public void erase(int X, int Y)
 	{
 		for(int i=0; i < 4; i++)
 		{
-			color[8 * (x + y * width) + i] = ansiColor[i];
+			color[8 * (X + Y * width) + i] = ansiColor[i];
 		}
 		for(int i=0; i < 4; i++)
 		{
-			color[8 * (x + y * width) + 4 + i] = ansiColor[0x20 + i];
+			color[8 * (X + Y * width) + 4 + i] = ansiColor[0x20 + i];
 		}
-		screen[x + y * width] = 0;
+		screen[X + Y * width] = 0;
 	}
 
 	public void writeWithShift(int b)
@@ -382,6 +386,33 @@ public class Screen
 		}
 		y--;
 		if(y == -1 && wrapy) y += height;
+	}
+
+	public void setX(int X)
+	{
+		x = X;
+		if(x < 0) x = 0;
+		if(x >= width) x = width - 1;
+	}
+
+	public void setY(int Y)
+	{
+		if(Y < 0) Y = 0;
+		if(Y >= height) Y = height;
+		y = Y + scroll;
+		if(y >= height) y -= height;
+	}
+
+	public int getX()
+	{
+		return x;
+	}
+
+	public int getY()
+	{
+		int ret = y - scroll;
+		if(ret < 0) ret += height;
+		return ret;
 	}
 
 	@SideOnly(Side.CLIENT)

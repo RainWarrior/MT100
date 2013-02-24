@@ -192,7 +192,7 @@ public class ScreenParser implements IReceiver, ITicker
 					case C0.LF:
 						screen.moveDownWithShift();
 					case C0.CR:
-						screen.x = 0;
+						screen.setX(0);
 					case C0.ESC:
 						curState = State.ESCAPE;
 						break;
@@ -206,7 +206,7 @@ public class ScreenParser implements IReceiver, ITicker
 				{
 					case C1.NEL:
 						screen.moveDownWithShift();
-						screen.x = 0;
+						screen.setX(0);
 					case C1.RI:
 						screen.moveUpWithShift();
 					case C1.CSI:
@@ -319,12 +319,8 @@ public class ScreenParser implements IReceiver, ITicker
 								case CS.HVP: // CHARACTER AND LINE POSITION
 									int[] coords = parseCSIParams(new int[]{ 1, 1 });
 									// FIXME move to screen
-									screen.x = coords[0] - 1;
-									while(screen.x < 0) screen.x += screen.width;
-									while(screen.x >= screen.width) screen.x -= screen.width;
-									screen.y = coords[1] - 1 + screen.scroll;
-									while(screen.y < 0) screen.y += screen.height;
-									while(screen.y >= screen.height) screen.y -= screen.height;
+									screen.setX(coords[0] - 1);
+									screen.setY(coords[1] - 1);
 									break;
 								case CS.SGR: // SELECT GRAPHIC RENDITION
 									String[] ps = splitCSIParams();
