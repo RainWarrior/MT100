@@ -158,17 +158,17 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		}
 		else if(methodNames[method] == "clear")
 		{
-			// TODO send
+			str = "" + 2 + CS.ED;
 			MT100.logger.info("Per.clear");
 		}
 		else if(methodNames[method] == "clearLine")
 		{
-			// TODO send
+			str = "" + 2 + CS.EL;
 			MT100.logger.info("Per.clearLine");
 		}
 		else if(methodNames[method] == "getCursorPos")
 		{
-			MT100.logger.info("Per.getCursorPos: " + te.screen.x + " " + te.screen.y);
+//			MT100.logger.info("Per.getCursorPos: " + te.screen.x + " " + te.screen.y);
 			return new Object[]{ te.screen.x, te.screen.y};
 		}
 		else if(methodNames[method] == "setCursorPos")
@@ -176,11 +176,11 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 			int x = ((Double)args[0]).intValue();
 			int y = ((Double)args[1]).intValue();
 			str = "" + (char)C1.CSI + (x + 1) + ";" + (y + 1) + (char)CS.HVP;
-			MT100.logger.info("Per.setCursorPos: " + x + " " + y);
+//			MT100.logger.info("Per.setCursorPos: " + x + " " + y);
 		}
 		else if(methodNames[method] == "setCursorBlink")
 		{
-			// TODO send
+			// TODO do i need this?
 			MT100.logger.info("Per.setCursorBlink");
 		}
 		else if(methodNames[method] == "isColor" || methodNames[method] == "isColour")
@@ -196,13 +196,31 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 			// TODO send
 			MT100.logger.info("Per.scroll");
 		}
-		else if(methodNames[method] == "setTextColor" || methodNames[method] == "setTextColour")
+		else if(methodNames[method] == "setTextColor" || methodNames[method] == "setTextColour"
+		|| methodNames[method] == "setBackgroundColor" || methodNames[method] == "setBackgroundColour")
 		{
-			// TODO send
+			int c = ((Double)args[0]).intValue();
+			boolean b = false;
+			if(c >= 0x100)
+			{
+				b = true;
+				c >>= 8;
+			}
+			int rc = 1;
+			while((c >>= 1) != 0) rc <<= 1;
+			boolean f = (methodNames[method].charAt(3) == 'T');
+			if(f)
+			{
+				str = "" + (char)C1.CSI + (rc + 30) + ";" + (b ? 1 : 22) + (char)CS.SGR;
+			}
+			else
+			{
+				str = "" + (char)C1.CSI + (rc + 40) + (char)CS.SGR;
+			}
 		}
 		else if(methodNames[method] == "setBackgroundColor" || methodNames[method] == "setBackgroundColour")
 		{
-			// TODO send
+			int c = ((Double)args[0]).intValue();
 		}
 		else
 		{

@@ -186,6 +186,13 @@ public class ScreenParser implements IReceiver, ITicker
 				MT100.logger.info("parseChar, C0: " + c);
 				switch(c)
 				{
+					case C0.BS:
+						screen.moveLeftWithShift();
+						break;
+					case C0.LF:
+						screen.moveDownWithShift();
+					case C0.CR:
+						screen.x = 0;
 					case C0.ESC:
 						curState = State.ESCAPE;
 						break;
@@ -197,6 +204,11 @@ public class ScreenParser implements IReceiver, ITicker
 				MT100.logger.info("parseChar, C1: " + c);
 				switch(c)
 				{
+					case C1.NEL:
+						screen.moveDownWithShift();
+						screen.x = 0;
+					case C1.RI:
+						screen.moveUpWithShift();
 					case C1.CSI:
 						curState = State.CSI_PARAM;
 						csiInters = 0;
@@ -291,10 +303,69 @@ public class ScreenParser implements IReceiver, ITicker
 								case CS.CUB: // CURSOR LEFT
 									screen.moveLeftWithShift();
 									break;
+								case CS.ED:  // ERASE IN PAGE
+									screen.clearScreen(parseCSIParams(new int[]{0})[0]);
+									break;
+								case CS.EL:  // ERASE IN LINE
+									screen.clearLine(parseCSIParams(new int[]{0})[0]);
+									break;
 								case CS.HVP: // CHARACTER AND LINE POSITION
 									int[] coords = parseCSIParams(new int[]{ 1, 1 });
 									screen.x = coords[0] - 1;
 									screen.y = coords[1] - 1;
+								case CS.SGR: // SELECT GRAPHIC RENDITION
+									String[] ps = splitCSIParams();
+									for(int i=0; i < ps.length; i++)
+									{
+										try
+										{
+											int p = Integer.parseInt(ps[i]);
+											MT100.logger.warning("p: " + p);
+											if(p >= 30 && p < 38)
+											{
+												screen.setAnsiFColor(p - 30);
+												MT100.logger.warning("AnsiF: " + (p - 30));
+											}
+											if(p >= 40 && p < 48)
+											{
+												screen.setAnsiBColor(p - 40);
+												MT100.logger.warning("AnsiF: " + (p - 40));
+											}
+											switch(p)
+											{
+												case 0: // default
+													screen.setDefBColor();
+													screen.setDefFColor();
+													screen.curBBold = false;
+													screen.curFBold = false;
+													break;
+												case 1:
+													screen.curFBold = true;
+													break;
+												case 2:
+													screen.curFBold = false; // TODO faint
+													break;
+												case 22:
+													screen.setDefBColor();
+													screen.setDefFColor();
+													screen.curFBold = false;
+													screen.curBBold = false;
+													break;
+												case 38: // T.416 TODO
+													break;
+												case 39:
+													screen.setDefFColor();
+													break;
+												case 49:
+													screen.setDefBColor();
+													break;
+											}
+										}
+										catch(NumberFormatException e)
+										{
+											MT100.logger.warning("Ignoring SGR Parameter: " + ps[i]);
+										}
+									}
 							}
 							curState = State.GROUND;
 						}
@@ -309,9 +380,14 @@ public class ScreenParser implements IReceiver, ITicker
 		}
 		while(repeat);
 	}
+	String[] splitCSIParams()
+	{
+		return csiParams.toString().split(String.valueOf((char)0x3B)); // ;
+	}
+
 	int[] parseCSIParams(int[] defs)
 	{
-		String[] ps = csiParams.toString().split(String.valueOf((char)0x3B)); // ;
+		String[] ps = splitCSIParams();
 		int[] ret = new int[defs.length];
 		try
 		{

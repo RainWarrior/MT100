@@ -75,10 +75,10 @@ public class Sym
 	{
 //		public static final int --- = 0x80;
 //		public static final int --- = 0x81;
-		public static final int BPH = 0x82;
+		public static final int BPH = 0x82; // BRAKE PERMITTED HERE
 		public static final int NBH = 0x83;
 //		public static final int --- = 0x84;
-		public static final int NEL = 0x85;
+		public static final int NEL = 0x85; // NEXT LINE
 		public static final int SSA = 0x86;
 		public static final int ESA = 0x87;
 		public static final int HTS = 0x88;
@@ -86,9 +86,9 @@ public class Sym
 		public static final int VTS = 0x8A;
 		public static final int PLD = 0x8B;
 		public static final int PLU = 0x8C;
-		public static final int RI  = 0x8D;
-		public static final int SS2 = 0x8E;
-		public static final int SS3 = 0x8F;
+		public static final int RI  = 0x8D; // REVERSE LINE FEED
+		public static final int SS2 = 0x8E; // SINGLE SHIFT TWO
+		public static final int SS3 = 0x8F; // SINGLE SHIFT THREE
 		public static final int DCS = 0x90; // DEVICE CONTROL STRING
 		public static final int PU1 = 0x91;
 		public static final int PU2 = 0x92;
@@ -112,7 +112,10 @@ public class Sym
 		public static final int CUD = 0x42; // CUSROR DOWN
 		public static final int CUF = 0x43; // CUSROR RIGHT
 		public static final int CUB = 0x44; // CUSROR LEFT
+		public static final int ED  = 0x4A; // ERASE IN PAGE
+		public static final int EL  = 0x4B; // ERASE IN LINE
 		public static final int HVP = 0x66; // CHARACTER AND LINE POSITION
+		public static final int SGR = 0x6D; // SELECT GRAPHIC RENDITION
 	}
 	public static int LWJGLToASCII(int key, boolean shift, boolean ctrl)
 	{

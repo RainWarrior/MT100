@@ -30,6 +30,7 @@ of this Program grant you additional permission to convey the resulting work.
 package rainwarrior.mt100;
 
 import java.lang.StringBuffer;
+import java.lang.Math;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -46,6 +47,10 @@ public class Screen
 {
 	public int[] screen;
 	public byte[] color; // RGBA background, RGBA foreground
+	public byte[] curBColor = new byte[4];
+	public byte[] curFColor = new byte[4];
+	public boolean curBBold = false;
+	public boolean curFBold = false;
 	protected boolean hasColor;
 	static byte[] ansiColor;
 	public int x=0;
@@ -101,6 +106,54 @@ public class Screen
 		resetColors_ARGB(0xFF000000, 0xFFFFFFFF);
 	}
 
+	public void setAnsiBColor(int c)
+	{
+		int sh = (curBBold ? 0x20 : 0) + c * 4;
+		setCurBColor(ansiColor[sh + 0], ansiColor[sh + 1], ansiColor[sh + 2], ansiColor[sh + 3]);
+	}
+
+	public void setDefBColor()
+	{
+		setAnsiBColor(0);
+	}
+
+	public void setCurBColor_ARGB(int bColor)
+	{
+		setCurBColor((bColor >> 16) & 0xFF, (bColor >> 8) & 0xFF, bColor & 0xFF, (bColor >> 24) & 0xFF);
+	}
+
+	public void setCurBColor(int bR, int bG, int bB, int bA)
+	{
+		curBColor[0] = (byte)bR;
+		curBColor[1] = (byte)bG;
+		curBColor[2] = (byte)bB;
+		curBColor[3] = (byte)bA;
+	}
+
+	public void setAnsiFColor(int c)
+	{
+		int sh = (curFBold ? 0x20 : 0) + c * 4;
+		setCurFColor(ansiColor[sh + 0], ansiColor[sh + 1], ansiColor[sh + 2], ansiColor[sh + 3]);
+	}
+
+	public void setDefFColor()
+	{
+		setAnsiFColor(7);
+	}
+
+	public void setCurFColor_ARGB(int fColor)
+	{
+		setCurFColor((fColor >> 16) & 0xFF, (fColor >> 8) & 0xFF, fColor & 0xFF, (fColor >> 24) & 0xFF);
+	}
+
+	public void setCurFColor(int fR, int fG, int fB, int fA)
+	{
+		curFColor[0] = (byte)fR;
+		curFColor[1] = (byte)fG;
+		curFColor[2] = (byte)fB;
+		curFColor[3] = (byte)fA;
+	}
+
 	public void resetColors_ARGB(int bColor, int fColor)
 	{
 		resetColors((bColor >> 16) & 0xFF, (bColor >> 8) & 0xFF, bColor & 0xFF, (bColor >> 24) & 0xFF,
@@ -109,6 +162,14 @@ public class Screen
 
 	public void resetColors(int bR, int bG, int bB, int bA, int fR, int fG, int fB, int fA)
 	{
+		curBColor[0] = (byte)bR;
+		curBColor[1] = (byte)bG;
+		curBColor[2] = (byte)bB;
+		curBColor[3] = (byte)bA;
+		curFColor[0] = (byte)fR;
+		curFColor[1] = (byte)fG;
+		curFColor[2] = (byte)fB;
+		curFColor[3] = (byte)fA;
 		if(hasColor)
 		{
 			for(int i=0; i < width * height * 8; i+=8)
@@ -167,6 +228,31 @@ public class Screen
 		tes.setColorRGBA(R, G, B, A);
 	}
 
+	public void clearLine(int p)
+	{
+		if(p != 0) for(int i = 0; i <= Math.min(x, width - 1); i++) erase();
+		if(p != 1) for(int i = Math.max(0, x); i < width; i++) erase();
+	}
+
+	public void clearScreen(int p)
+	{
+		clearLine(p);
+		int i = scroll;
+		boolean passed = false;
+		do
+		{
+			if(i == y)
+			{
+				passed = true;
+				continue;
+			}
+			if(p != 0 && !passed) clearLine(2);
+			if(p != 1 && passed) clearLine(2);
+			scroll++;
+		}
+		while(i != scroll);
+	}
+
 	public void readFromNBT(NBTTagCompound cmp)
 	{
 		// TODO
@@ -177,12 +263,46 @@ public class Screen
 		// TODO
 	}
 
-	public void writeWithShift(int b)
+	public void writeWithCheck(int b)
 	{
 		if(x >= 0 && x < width && y >= 0 && y < height)
 		{
-			screen[x + y * width] = b;
+			write(b);
 		}
+	}
+
+	public void write(int b)
+	{
+		if(hasColor)
+		{
+			for(int i=0; i < 4; i++)
+			{
+				color[8 * (x + y * width) + i] = curBColor[i];
+			}
+			for(int i=0; i < 4; i++)
+			{
+				color[8 * (x + y * width) + 4 + i] = curFColor[i];
+			}
+		}
+		screen[x + y * width] = b;
+	}
+
+	public void erase()
+	{
+		for(int i=0; i < 4; i++)
+		{
+			color[8 * (x + y * width) + i] = ansiColor[i];
+		}
+		for(int i=0; i < 4; i++)
+		{
+			color[8 * (x + y * width) + 4 + i] = ansiColor[0x20 + i];
+		}
+		screen[x + y * width] = 0;
+	}
+
+	public void writeWithShift(int b)
+	{
+		writeWithCheck(b);
 		moveRightWithShift();
 	}
 
