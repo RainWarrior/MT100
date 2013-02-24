@@ -309,10 +309,23 @@ public class ScreenParser implements IReceiver, ITicker
 								case CS.EL:  // ERASE IN LINE
 									screen.clearLine(parseCSIParams(new int[]{0})[0]);
 									break;
+								case CS.SU:  // SCROLL UP
+									screen.scrollUp(parseCSIParams(new int[]{1})[0]);
+									break;
+								case CS.SD:  // SCROLL DOWN
+									screen.scrollDown(parseCSIParams(new int[]{1})[0]);
+									break;
+								case CS.CUP: // CURSOR POSITION
 								case CS.HVP: // CHARACTER AND LINE POSITION
 									int[] coords = parseCSIParams(new int[]{ 1, 1 });
+									// FIXME move to screen
 									screen.x = coords[0] - 1;
-									screen.y = coords[1] - 1;
+									while(screen.x < 0) screen.x += screen.width;
+									while(screen.x >= screen.width) screen.x -= screen.width;
+									screen.y = coords[1] - 1 + screen.scroll;
+									while(screen.y < 0) screen.y += screen.height;
+									while(screen.y >= screen.height) screen.y -= screen.height;
+									break;
 								case CS.SGR: // SELECT GRAPHIC RENDITION
 									String[] ps = splitCSIParams();
 									for(int i=0; i < ps.length; i++)
@@ -343,7 +356,7 @@ public class ScreenParser implements IReceiver, ITicker
 													screen.curFBold = true;
 													break;
 												case 2:
-													screen.curFBold = false; // TODO faint
+													screen.curFBold = false; // TODO faint maybe?
 													break;
 												case 22:
 													screen.setDefBColor();
@@ -366,6 +379,7 @@ public class ScreenParser implements IReceiver, ITicker
 											MT100.logger.warning("Ignoring SGR Parameter: " + ps[i]);
 										}
 									}
+									break;
 							}
 							curState = State.GROUND;
 						}

@@ -116,32 +116,6 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		return methodNames;
 	}
     
-	/**
-	 * This is called when a lua program on an attached computer calls peripheral.call() with
-	 * one of the methods exposed by getMethodNames().<br>
-	 * <br>
-	 * Be aware that this will be called from the ComputerCraft Lua thread, and must be thread-safe
-	 * when interacting with minecraft objects.
-	 * @param 	computer	The interface to the computer that is making the call. Remember that multiple
-	 *						computers can be attached to a peripheral at once.
-	 * @param	method		An integer identifying which of the methods from getMethodNames() the computer
-	 *						wishes to call. The integer indicates the index into the getMethodNames() table
-	 *						that corresponds to the string passed into peripheral.call()
-	 * @param	arguments	An array of objects, representing the arguments passed into peripheral.call().<br>
-	 *						Lua values of type "string" will be represented by Object type String.<br>
-	 *						Lua values of type "number" will be represented by Object type Double.<br>
-	 *						Lua values of type "boolean" will be represented by Object type Boolean.<br>
-	 *						Lua values of any other type will be represented by a null object.<br>
-	 *						This array will be empty if no arguments are passed.
-	 * @return 	An array of objects, representing values you wish to return to the lua program.<br>
-	 *			Integers, Doubles, Floats, Strings, Booleans and null be converted to their corresponding lua type.<br>
-	 *			All other types will be converted to nil.<br>
-	 *			You may return null to indicate no values should be returned.
-	 * @throws	Exception	If you throw any exception from this function, a lua error will be raised with the
-	 *						same message as your exception. Use this to throw appropriate errors if the wrong
-	 *						arguments are supplied to your method.
-	 * @see 	#getMethodNames
-	 */
 	@Override
 	public synchronized Object[] callMethod(IComputerAccess computer, int method, Object[] args) throws Exception
 	{
@@ -168,15 +142,18 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		}
 		else if(methodNames[method] == "getCursorPos")
 		{
-//			MT100.logger.info("Per.getCursorPos: " + te.screen.x + " " + te.screen.y);
-			return new Object[]{ te.screen.x, te.screen.y};
+			// TODO maybe switch to DSR and blocking, or store local copy
+			int y = te.screen.y - te.screen.scroll;
+			if(y < 0) y += te.screen.height;
+			MT100.logger.info("Per.getCursorPos: " + te.screen.x + " " + y);
+			return new Object[]{ te.screen.x, y};
 		}
 		else if(methodNames[method] == "setCursorPos")
 		{
 			int x = ((Double)args[0]).intValue();
 			int y = ((Double)args[1]).intValue();
 			str = "" + (char)C1.CSI + (x + 1) + ";" + (y + 1) + (char)CS.HVP;
-//			MT100.logger.info("Per.setCursorPos: " + x + " " + y);
+			MT100.logger.info("Per.setCursorPos: " + x + " " + y);
 		}
 		else if(methodNames[method] == "setCursorBlink")
 		{
@@ -193,7 +170,9 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 		}
 		else if(methodNames[method] == "scroll")
 		{
-			// TODO send
+			int p = ((Double)args[0]).intValue();
+			if(p > 0) str = "" + (char)C1.CSI +   p  + (char)CS.SD;
+			if(p < 0) str = "" + (char)C1.CSI + (-p) + (char)CS.SU;
 			MT100.logger.info("Per.scroll");
 		}
 		else if(methodNames[method] == "setTextColor" || methodNames[method] == "setTextColour"

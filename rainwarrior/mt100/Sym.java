@@ -112,8 +112,11 @@ public class Sym
 		public static final int CUD = 0x42; // CUSROR DOWN
 		public static final int CUF = 0x43; // CUSROR RIGHT
 		public static final int CUB = 0x44; // CUSROR LEFT
+		public static final int CUP = 0x48; // CURSOR POSITION
 		public static final int ED  = 0x4A; // ERASE IN PAGE
 		public static final int EL  = 0x4B; // ERASE IN LINE
+		public static final int SU  = 0x53; // SCROLL UP
+		public static final int SD  = 0x54; // SCROLL DOWN
 		public static final int HVP = 0x66; // CHARACTER AND LINE POSITION
 		public static final int SGR = 0x6D; // SELECT GRAPHIC RENDITION
 	}

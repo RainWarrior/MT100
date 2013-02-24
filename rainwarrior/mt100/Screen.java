@@ -230,8 +230,13 @@ public class Screen
 
 	public void clearLine(int p)
 	{
-		if(p != 0) for(int i = 0; i <= Math.min(x, width - 1); i++) erase();
-		if(p != 1) for(int i = Math.max(0, x); i < width; i++) erase();
+		clearLine(p, y);
+	}
+
+	public void clearLine(int p, int y)
+	{
+		if(p != 0) for(int i = 0; i <= Math.min(x, width - 1); i++) erase(y);
+		if(p != 1) for(int i = Math.max(0, x); i < width; i++) erase(y);
 	}
 
 	public void clearScreen(int p)
@@ -248,9 +253,33 @@ public class Screen
 			}
 			if(p != 0 && !passed) clearLine(2);
 			if(p != 1 && passed) clearLine(2);
-			scroll++;
+			i++;
 		}
 		while(i != scroll);
+	}
+
+	public void scrollUp(int p)
+	{
+		while(p-- > 0)
+		{
+			scroll--;
+			y--;
+			if(scroll < 0) scroll += height;
+			if(y < 0) y += height;
+			clearLine(2, scroll);
+		}
+	}
+
+	public void scrollDown(int p)
+	{
+		while(p-- > 0)
+		{
+			clearLine(2, scroll);
+			scroll++;
+			y++;
+			if(scroll >= height) scroll -= height;
+			if(y >= height) y -= height;
+		}
 	}
 
 	public void readFromNBT(NBTTagCompound cmp)
@@ -289,6 +318,11 @@ public class Screen
 
 	public void erase()
 	{
+		erase(y);
+	}
+
+	public void erase(int y)
+	{
 		for(int i=0; i < 4; i++)
 		{
 			color[8 * (x + y * width) + i] = ansiColor[i];
@@ -322,7 +356,8 @@ public class Screen
 		if(y == height && wrapy) y -= height;
 		if(doScroll && y == scroll)
 		{
-			this.scroll++;
+			scroll++;
+			clearLine(2);
 			if(scroll == height) scroll -= height;
 		}
 	}
@@ -341,7 +376,8 @@ public class Screen
 	{
 		if(doScroll && y == scroll)
 		{
-			this.scroll--;
+			scroll--;
+			clearLine(2);
 			if(scroll == -1) scroll += height;
 		}
 		y--;
