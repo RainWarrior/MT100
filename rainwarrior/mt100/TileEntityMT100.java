@@ -58,7 +58,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	@SideOnly(Side.CLIENT)
 	public GuiMT100 curGui;
 	public Screen screen;
-	public ScreenParser screenParser;
+	public Parser parser;
 	boolean isServer;
 	public PeripheralUART uart = null;
 
@@ -82,7 +82,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	public TileEntityMT100(boolean isServer)
 	{
 		screen = new Screen(40, 24, true);
-		screenParser = new ScreenParser(screen);
+		parser = new Parser(new ScreenConsumer(screen));
 		netInput = new QueueBuffer(Reference.PACKET_SIZE, true);
 		netOutput = new QueueBuffer(Reference.PACKET_SIZE * 2, Reference.NET_QUOTA, true);
 		this.isServer = isServer;
@@ -90,7 +90,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		if(isServer)
 		{
 			input = new QueueBuffer();
-			input.connect(screenParser);
+			input.connect(parser);
 			input.connect(netOutput);
 			// ECHO
 //			d = new DropBuffer(true);
@@ -99,7 +99,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		}
 		else
 		{
-			netInput.connect(screenParser);
+			netInput.connect(parser);
 		}
 //		MT100.logger.info("new TileEntityMT100, side: " + FMLCommonHandler.instance().getEffectiveSide());
 	}
@@ -130,7 +130,6 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		super.readFromNBT(cmp);
 		this.test = cmp.getInteger("test") + 1;
 		this.screen.readFromNBT(cmp);
-		this.screenParser.readFromNBT(cmp);
 		MT100.logger.info("readFromNBT: (" + xCoord + "," + yCoord + "," + zCoord + "), test: " + test + ", side: " + FMLCommonHandler.instance().getEffectiveSide());
 	}
 
@@ -140,7 +139,6 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		super.writeToNBT(cmp);
 		cmp.setInteger("test", this.test);
 		this.screen.writeToNBT(cmp);
-		this.screenParser.writeToNBT(cmp);
 	}
 
 	@SideOnly(Side.CLIENT)
@@ -173,7 +171,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 					curGui.update();
 				}
 			}
-			screenParser.update();
+			parser.update();
 			if(!netOutput.buffer.isEmpty())
 			{
 				PacketHandler.sendTileData(this, netOutput.buffer);

@@ -29,23 +29,15 @@ of this Program grant you additional permission to convey the resulting work.
 
 package rainwarrior.mt100;
 
-public class Reference
+public interface IParserConsumer
 {
-	public static final String MOD_ID               = "MT100";
-	public static final String MOD_NAME             = "MT100 Terminal Emulator";
-	public static final String CHANNEL_NAME         = MOD_ID;
-	public static final String SERVER_PROXY_CLASS   = "rainwarrior.mt100.CommonProxy";
-	public static final String CLIENT_PROXY_CLASS   = "rainwarrior.mt100.client.ClientProxy";
-	public static final int    QUEUE_SIZE           = 4096;
-	public static final int    PACKET_SIZE          = 16384;
-	public static final int    QUOTA                = 115200 / 20;
-	public static final int    NET_QUOTA            = 115200 / 20;
-	public static final int    PARSER_UPDATE_QUOTA  = 115200 / 20;
-	public static final int    CC_EVENT_QUOTA       = 115200 / 20;
-	public static final byte   PACKET_CONNECT       = 0;
-	public static final byte   PACKET_TILE_REQUEST  = 1;
-	public static final byte   PACKET_TILE_RESPONSE = 2;
-	public static final byte   PACKET_DATA          = 1;
-	public static final long   TYPEMATIC_DELAY      = 500;
-	public static final long   TYPEMATIC_SPEED      = 20;
+	public void G0(int c); // Graphical character, 0x20 - 0x7E, 0xA0 - 0x10FFFF
+	public void C0(int c);
+	public void C1(int c);
+	public void Fs(int c);
+	public void NormalCS(int c, Integer[] p); // null means default value
+	/*
+	 * gets called when failed to construct params for previous method
+	 */
+	public void RawCS(int c, String p);
 }

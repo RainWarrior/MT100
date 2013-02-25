@@ -215,7 +215,7 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 				this.output.update();
 				// hack, because otherwise state will be incorrect
 				this.te.input.update();
-				this.te.screenParser.update();
+				this.te.parser.update();
 			}
 		}
 		return null;
