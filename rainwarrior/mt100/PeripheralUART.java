@@ -38,6 +38,8 @@ import net.minecraft.nbt.NBTTagCompound;
 
 import cpw.mods.fml.common.FMLCommonHandler;
 
+import org.lwjgl.input.Keyboard;
+
 import dan200.computer.api.IHostedPeripheral;
 import dan200.computer.api.IComputerAccess;
 
@@ -45,12 +47,10 @@ import rainwarrior.mt100.Sym.C0;
 import rainwarrior.mt100.Sym.C1;
 import rainwarrior.mt100.Sym.CS;
 
-public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, ITicker
+public class PeripheralUART implements IHostedPeripheral, IParserConsumer, ISender, IReceiver, ITicker
 {
 	@Delegate(types=ISender.class)
 	QueueBuffer output = new QueueBuffer(); // CC -> UART
-	@Delegate(types=IReceiver.class)
-	QueueBuffer input = new QueueBuffer(); // UART -> CC
 
 	volatile IComputerAccess computer = null;
 	static final AtomicReferenceFieldUpdater<PeripheralUART, IComputerAccess> updater = AtomicReferenceFieldUpdater.newUpdater(PeripheralUART.class, IComputerAccess.class, "computer");
@@ -58,6 +58,8 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 	Object callLock = new Object();
 
 	TileEntityMT100 te;
+	@Delegate(types=IReceiver.class)
+	Parser parser = new Parser(this); // UART -> CC
 
 	static final String[] methodNames = new String[]{
 		"write",
@@ -252,38 +254,105 @@ public class PeripheralUART implements IHostedPeripheral, ISender, IReceiver, IT
 	public void update()
 	{
 //		MT100.logger.info("Per.update");
+//		quota = Reference.CC_EVENT_QUOTA;
+		parser.update();
 		output.update();
-		if(computer != null && !input.buffer.isEmpty())
+	}
+
+	// IParserConsumer
+	@Override
+	public void G0(int c)
+	{
+		if(computer != null)
 		{
-			try
+			if(c < 0x7F)
 			{
-				int quota = Reference.CC_EVENT_QUOTA, ret = 0;
-				Object[] t;
-				byte b;
-				Integer k;
-				Character c;
-				while(!input.buffer.isEmpty() && quota != 0)
-				{ // directly passing UTF-8 to Lua
-					b = input.buffer.take();
-					t = Sym.ASCIIToLWJGL(b);
-					k = (Integer)t[0];
-					c = (Character)t[1];
-					MT100.logger.info("Update: k:" + k + ", c: " + c);
-					if(c != 0)
-					{
-						computer.queueEvent("char", new Object[]{ "" + c });
-					}
-					if(k != 0)
-					{
-						computer.queueEvent("key", new Object[]{ k });
-					}
+				Object[] t = Sym.ASCIIToLWJGL(c);
+				int k = ((Integer)t[0]).intValue();
+				c = ((Integer)t[1]).intValue();
+				MT100.logger.info("Event: k:" + k + ", c: " + c);
+				if(k != 0)
+				{
+					computer.queueEvent("key", new Object[]{ k });
 				}
 			}
-			catch(InterruptedException e)
+			if(c != 0)
 			{
-				MT100.logger.severe("InterruptedException in Per.update: " + e);
+				computer.queueEvent("char", new Object[]{ "" + (char)c });
 			}
 		}
 	}
-}
 
+	@Override
+	public void C0(int c)
+	{
+		if(computer != null)
+		{
+			MT100.logger.info("parse2, C0: " + c);
+			switch(c)
+			{
+				case C0.BS:
+					computer.queueEvent("key", new Object[]{ Keyboard.KEY_BACK });
+					break;
+				case C0.HT:
+					computer.queueEvent("key", new Object[]{ Keyboard.KEY_TAB });
+					break;
+//				case C0.ESC:
+//					computer.queueEvent("key", new Object[]{ Keyboard.KEY_ESCAPE });
+//					break;
+				case C0.CR:
+					computer.queueEvent("key", new Object[]{ Keyboard.KEY_RETURN });
+					break;
+			}
+		}
+	}
+
+	@Override
+	public void C1(int c)
+	{
+		MT100.logger.info("parse2, C1: " + c);
+	}
+
+	@Override
+	public void Fs(int c)
+	{
+	}
+
+	public int get(Integer[] p, int i, int d)
+	{
+		if(p.length <= i || p[i] == null) return d;
+		return p[i];
+	}
+
+	@Override
+	public void NormalCS(int c, Integer[] p)
+	{
+		MT100.logger.info("NormalCS: c: " + c +  ", p: " + p);
+		int i;
+		switch(c)
+		{
+			case CS.CUU: // CURSOR UP
+				i = get(p, 0, 1);
+				while(i-- > 0) computer.queueEvent("key", new Object[]{ Keyboard.KEY_UP });
+				break;
+			case CS.CUD: // CURSOR DOWN
+				i = get(p, 0, 1);
+				while(i-- > 0) computer.queueEvent("key", new Object[]{ Keyboard.KEY_DOWN });
+				break;
+			case CS.CUF: // CURSOR RIGHT
+				i = get(p, 0, 1);
+				while(i-- > 0) computer.queueEvent("key", new Object[]{ Keyboard.KEY_RIGHT });
+				break;
+			case CS.CUB: // CURSOR LEFT
+				i = get(p, 0, 1);
+				while(i-- > 0) computer.queueEvent("key", new Object[]{ Keyboard.KEY_LEFT });
+				break;
+		}
+	}
+
+	@Override
+	public void RawCS(int c, String p)
+	{
+		MT100.logger.info("RawCS: c: " + c +  ", p: " + p);
+	}
+}

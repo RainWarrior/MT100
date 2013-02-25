@@ -278,11 +278,11 @@ public class Sym
 	public static Object[] ASCIIToLWJGL(int b)
 	{
 		int k = 0;
-		char c = 0;
+		int c = 0;
 		if(b >= 0x20 && b < 0x7F)
 		{
 			k = LinuxKeycodes.mapKeySymToLWJGLKeyCode(b);
-			c = (char) b;
+			c = b;
 		}
 		else
 		{

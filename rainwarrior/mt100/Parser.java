@@ -270,7 +270,7 @@ public class Parser implements IReceiver, ITicker
 	}
 	public static String[] splitCSIParams(String p)
 	{
-		return p.split(String.valueOf((char)0x3B)); // ;
+		return ((p.length() == 0) ? new String[0] : p.split(String.valueOf((char)0x3B))); // ;
 	}
 }
 
