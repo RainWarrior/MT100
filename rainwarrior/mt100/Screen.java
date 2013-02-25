@@ -58,8 +58,8 @@ public class Screen
 	int scroll=0;
 	public int width;
 	public int height;
-	boolean wrapx = true, wrapy = true;
-	boolean doScroll = true;
+	boolean wrapx = false, wrapy = false;
+	boolean doScroll = false;
 	static boolean debug = false;
 
 	static
