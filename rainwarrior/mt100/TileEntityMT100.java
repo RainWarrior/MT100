@@ -71,7 +71,6 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 
 	public Object updateLock = new Object();
 
-	public int tick = 0;
 	public boolean backlight = true;
 	@SideOnly(Side.CLIENT)
 
@@ -155,7 +154,6 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 		synchronized(updateLock)
 		{
 //			MT100.logger.info("update!: " + FMLCommonHandler.instance().getEffectiveSide() + netInput.buffer.size() + " " + netOutput.buffer.size() + " " + screen.buffer.buffer.size());
-			if(tick++ >= 26) tick = 0;
 			netInput.update();
 			if(isServer)
 			{

@@ -82,7 +82,6 @@ public class TileEntityMT100Renderer extends TileEntitySpecialRenderer
 		}
 		RenderHelper.disableStandardItemLighting();
 		te.screen.render(14, 12);
-		RenderHelper.enableStandardItemLighting();
 		if(te.backlight)
 		{
 			OpenGlHelper.setActiveTexture(OpenGlHelper.lightmapTexUnit);
@@ -106,7 +105,7 @@ public class TileEntityMT100Renderer extends TileEntitySpecialRenderer
 		addSquareZ(tes, -8, w1, -8, -w1, w2);
 		addSquareZ(tes, -8, -w1, -w1, 8, w2);
 
-		addSquareZ(tes, -w1, -w1, w1, w1, -8);
+		addSquareZ(tes, -w1, w1, -w1, w1, -8);
 
 		addSquareX(tes, -8, -8, 8, w2, 8);
 		addSquareX(tes, 8, 8, -8, w2, 8);
@@ -120,14 +119,7 @@ public class TileEntityMT100Renderer extends TileEntitySpecialRenderer
 
 		tes.draw();
 		GL11.glEnable(GL11.GL_TEXTURE_2D);
-		this.bindTextureByName("/rainwarrior/mt100/client/2/rr2-" + te.tick + ".png");
-		tes.startDrawingQuads();
-		tes.addVertexWithUV(-w1, -w1, -8, 0, 0);
-		tes.addVertexWithUV(w1, -w1, -8, 1, 0);
-		tes.addVertexWithUV(w1, w1, -8, 1, 1);
-		tes.addVertexWithUV(-w1, w1, -8, 0, 1);
-		tes.draw();
-		
+		RenderHelper.enableStandardItemLighting();
 		GL11.glPopMatrix();
 	}
 }

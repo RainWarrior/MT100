@@ -43,18 +43,6 @@ public class ClientProxy extends CommonProxy
 	{
 		super.registerStuff();
 		PstFontRegistry.init();
-		for(int i=0; i < 27; i++)
-		{
-			MinecraftForgeClient.preloadTexture("/rainwarrior/mt100/client/2/rr2-" + i + ".png");
-		}
 		ClientRegistry.bindTileEntitySpecialRenderer(TileEntityMT100.class, new TileEntityMT100Renderer());
-/*		try
-		{
-			Timer.class.getDeclaredField("worldAccesses").setAccessible(true);
-		}
-		catch(Exception e)
-		{
-			MT100.logger.severe("Failed to change access to timer");
-		}*/
 	}
 }

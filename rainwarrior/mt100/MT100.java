@@ -71,7 +71,7 @@ public class MT100 // extends BaseMod
 	@SidedProxy(clientSide=Reference.CLIENT_PROXY_CLASS, serverSide=Reference.SERVER_PROXY_CLASS)
 	public static CommonProxy proxy;
 
-	public static final Block blockMT100 = new BlockMT100(blockId, 16, Material.ground);
+	public static final Block blockMT100 = new BlockMT100(blockId, Material.ground);
 
 	public static Logger logger;
 //	public static Logger logger2;

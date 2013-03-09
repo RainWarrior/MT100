@@ -48,12 +48,12 @@ import rainwarrior.mt100.TileEntityMT100;
 
 public class BlockMT100 extends BlockContainer
 {
-	public BlockMT100(int id, int texture, Material material)
+	public BlockMT100(int id, Material material)
 	{
-		super(id, texture, material);
+		super(id, material);
 		setHardness(.5f);
 		setStepSound(Block.soundGravelFootstep);
-		setBlockName("BlockMT100");
+		setUnlocalizedName("BlockMT100");
 		setCreativeTab(CreativeTabs.tabBlock);
 	}
 
