@@ -215,10 +215,10 @@ public class PacketHandler implements IPacketHandler
 		if(FMLCommonHandler.instance().getEffectiveSide().isServer())
 		{
 //			MT100.logger.info("World: " + te.worldObj);
-			PlayerInstance players = ((WorldServer)te.worldObj).getPlayerManager().getPlayerInstance(te.xCoord >> 4, te.zCoord >> 4, false);
+			PlayerInstance players = ((WorldServer)te.worldObj).getPlayerManager().getOrCreateChunkWatcher(te.xCoord >> 4, te.zCoord >> 4, false);
 			if(players != null)
 			{
-				players.sendPacketToPlayersInInstance(packet);
+				players.sendToAllPlayersWatchingChunk(packet);
 			}
 		}
 		else
