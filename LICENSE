@@ -19,6 +19,7 @@ External libraries included with MT100 may also be
 distributed under different licensing terms.
 The location and the exact terms of this other code is mentioned below.
 
+Files that include LGPL notice could be distributed independently under LGPL.
 
 File rainwarrior/mt100/LinuxKeycodes.java is distributed under the following
 terms:
