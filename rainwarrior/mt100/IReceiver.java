@@ -21,7 +21,7 @@ along with MT100. If not, see <http://www.gnu.org/licenses/>.
 
 package rainwarrior.mt100;
 
-import java.util.Iterator;
+import java.nio.ByteBuffer;
 
 public interface IReceiver
 {
@@ -30,7 +30,8 @@ public interface IReceiver
 	 */
 	public int capacity();
 	/*
+	 * data should be in read mode
 	 * returns number of bytes received
 	 */
-	public int receive(Iterator<Byte> data);
+	public int receive(ByteBuffer data);
 }

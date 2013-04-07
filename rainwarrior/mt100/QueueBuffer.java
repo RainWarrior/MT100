@@ -27,7 +27,7 @@ of this Program grant you additional permission to convey the resulting work.
 
 */
 
-package rainwarrior.mt100;
+/*package rainwarrior.mt100;
 
 import java.util.Iterator;
 import java.util.HashSet;
@@ -45,7 +45,7 @@ public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 
 	/*
 	 * Quota affects receiving speed
-	 */
+	 * /
 	public QueueBuffer(int size, int quota, boolean noisy)
 	{
 //		MT100.registerTicker(this);
@@ -126,4 +126,4 @@ public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	{
 		recs.clear();
 	}
-}
+}*/

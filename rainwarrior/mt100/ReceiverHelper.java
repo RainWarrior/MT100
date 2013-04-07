@@ -40,7 +40,7 @@ import cpw.mods.fml.common.FMLCommonHandler;
 
 public class ReceiverHelper
 {
-	public static int receiveIntoQueue(BlockingQueue<Byte> output, Iterator<Byte> data, int quota)
+/*	public static int receiveIntoQueue(BlockingQueue<Byte> output, Iterator<Byte> data, int quota)
 	{
 		int ret = 0;
 		while(output.remainingCapacity() > 0 && data.hasNext() && quota != 0)
@@ -101,16 +101,19 @@ public class ReceiverHelper
 			}
 //			MT100.logger.info("#");
 		}
-	}
+	}*/
 
 	// buffer must be in read mode
 	public static void updateFromByteBuffer(Collection<IReceiver> recs, ByteBuffer input)
 	{
+		input.flip();
 		if(recs.size() == 0)
 		{
 			throw new RuntimeException("BAD");
 		}
 		int m = input.remaining();
+		int oldLimit = input.limit();
+		int oldPos = input.position();
 		for(IReceiver rec : recs)
 		{
 			int c = rec.capacity();
@@ -118,23 +121,22 @@ public class ReceiverHelper
 //			MT100.logger.info("@");
 		}
 //		MT100.logger.info("3 " + FMLCommonHandler.instance().getEffectiveSide() + m + " " + recs.size());
-		byte[] b = new byte[m];
-		input.get(b);
-		ArrayList<Byte> buf = new ArrayList<Byte>(m);
-		for(byte bt : b)
-		{
-			buf.add(bt);
-//			MT100.logger.info("SEND: " + bt);
-		}
+		input.limit(oldPos + m);
+//		MT100.logger.info("SEND: " + oldPos + " " + oldLimit + " " + m);
 		int ret;
 		for(IReceiver rec : recs)
 		{
-			ret = rec.receive(buf.iterator());
+			ret = rec.receive(input);
+//			MT100.logger.info("SEND2: " + input.position() + " " + ret);
+			input.position(oldPos);
 			if(ret != m)
 			{
 				MT100.logger.severe("Receiver can't handle it's capacity");
 			}
 //			MT100.logger.info("#");
 		}
+		input.position(oldPos + m);
+		input.limit(oldLimit);
+		input.compact();
 	}
 }

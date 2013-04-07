@@ -29,7 +29,7 @@ of this Program grant you additional permission to convey the resulting work.
 
 package rainwarrior.mt100;
 
-import java.util.Iterator;
+import java.nio.ByteBuffer;
 import cpw.mods.fml.common.FMLLog;
 
 public class DropBuffer implements ISender, IUnsafeSender, IReceiver
@@ -51,11 +51,11 @@ public class DropBuffer implements ISender, IUnsafeSender, IReceiver
 	}
 
 	@Override
-	public int receive(Iterator<Byte> data)
+	public int receive(ByteBuffer data)
 	{
 		int ret = rec.receive(data);
 //		MT100.logger.info("DropBuffer!!!!");
-		if(noisy && data.hasNext())
+		if(noisy && data.position() != 0)
 		{
 			MT100.logger.warning("DropBuffer dropping");
 		}

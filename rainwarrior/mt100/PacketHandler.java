@@ -125,16 +125,18 @@ public class PacketHandler implements IPacketHandler
 						return;
 					}
 					short size = str.readShort();
-					ArrayList<Byte> data = new ArrayList<Byte>(size);
+					ByteBuffer data = ByteBuffer.allocate(size);
 					for(int i=0; i < size; i++)
 					{
-						data.add(str.readByte());
+						data.put(str.readByte());
 					}
-					int ret = te.netInput.receive(data.iterator());
-					if(ret < data.size())
+					data.flip();
+					int ret = te.netInput.receive(data);
+					if(data.hasRemaining())
 					{
 						MT100.logger.severe("Dropping on packet receiving");
 					}
+					data.compact();
 //					MT100.logger.info("1 " + FMLCommonHandler.instance().getEffectiveSide() + ret);
 				break;
 

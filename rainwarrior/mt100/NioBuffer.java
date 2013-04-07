@@ -72,12 +72,10 @@ public class NioBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	@Override
 	public synchronized void update()
 	{
-		buffer.flip();
-		if(buffer.hasRemaining() && !recs.isEmpty())
+		if(buffer.position() != 0 && !recs.isEmpty())
 		{
 			ReceiverHelper.updateFromByteBuffer(recs, buffer);
 		}
-		buffer.compact();
 	}
 
 	@Override
@@ -87,9 +85,23 @@ public class NioBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	}
 
 	@Override
-	public synchronized int receive(Iterator<Byte> data)
+	public synchronized int receive(ByteBuffer data)
 	{
-		int ret = ReceiverHelper.receiveIntoByteBuffer(buffer, data, quota);
+//		int ret = ReceiverHelper.receiveIntoByteBuffer(buffer, data, quota);
+		int ret = data.remaining();
+//		MT100.logger.info("REC: " + ret);
+		if(ret > buffer.remaining())
+		{
+			int rest = ret - buffer.remaining();
+			data.limit(data.limit() - rest);
+			buffer.put(data);
+			data.limit(data.limit() + rest);
+			ret = ret - rest;
+		}
+		else
+		{
+			buffer.put(data);
+		}
 		//update();
 		return ret;
 	}

@@ -29,7 +29,6 @@ of this Program grant you additional permission to convey the resulting work.
 
 package rainwarrior.mt100;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 import lombok.Delegate;
@@ -208,12 +207,7 @@ public class PeripheralUART implements IHostedPeripheral, IParserConsumer, ISend
 			synchronized(te.updateLock)
 			{
 				byte[] b = str.getBytes("UTF-8");
-				ArrayList<Byte> data = new ArrayList<Byte>(b.length);
-				for(int i=0; i < b.length; i++)
-				{
-					data.add(b[i]);
-				}
-				this.output.receive(data.iterator());
+				this.output.buffer.put(b);
 				this.output.update();
 				// hack, because otherwise state will be incorrect
 				this.te.input.update();
