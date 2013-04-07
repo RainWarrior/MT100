@@ -29,6 +29,7 @@ of this Program grant you additional permission to convey the resulting work.
 
 package rainwarrior.mt100;
 
+import java.nio.ByteBuffer;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
@@ -120,7 +121,7 @@ public class PacketHandler implements IPacketHandler
 					TileEntityMT100 te = (TileEntityMT100)((EntityPlayer)player).worldObj.getBlockTileEntity(x, y, z);
 					if(te == null)
 					{
-						MT100.logger.severe("No handler for packet");
+						MT100.logger.severe("No handler for packet: " + x + " " + y + " " + z);
 						return;
 					}
 					short size = str.readShort();
@@ -183,12 +184,20 @@ public class PacketHandler implements IPacketHandler
 					str.writeInt(te.xCoord);
 					str.writeInt(te.yCoord);
 					str.writeInt(te.zCoord);
-					Collection<Byte> data = (Collection<Byte>) args[i++];
+/*					Collection<Byte> data = (Collection<Byte>) args[i++];
 					str.writeShort(data.size());
 					for(Byte b : data)
 					{
 						str.writeByte(b);
+					}*/
+					ByteBuffer data = (ByteBuffer) args[i++];
+					data.flip();
+					str.writeShort(data.remaining());
+					while(data.hasRemaining())
+					{
+						str.writeByte(data.get());
 					}
+					data.clear();
 				break;
 				default:
 					MT100.logger.severe("Sending bad packet: " + id);

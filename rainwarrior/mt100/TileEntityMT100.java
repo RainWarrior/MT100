@@ -31,15 +31,8 @@ package rainwarrior.mt100;
 
 import java.util.Iterator;
 import java.util.Queue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.HashSet;
 import lombok.Delegate;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockContainer;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityChest;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.Packet132TileEntityData;
@@ -64,10 +57,10 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 //	public SocketUART uart;
 
 	@Delegate(types=IReceiver.class)
-	public QueueBuffer input;
+	public NioBuffer input;
 	@Delegate(types=ISender.class)
-	public QueueBuffer netInput;
-	QueueBuffer netOutput;
+	public NioBuffer netInput;
+	NioBuffer netOutput;
 	DropBuffer d;
 
 	public Object updateLock = new Object();
@@ -82,13 +75,13 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	{
 		screen = new Screen(80, 24, true);
 		parser = new Parser(new ScreenConsumer(screen));
-		netInput = new QueueBuffer(Reference.PACKET_SIZE, true);
-		netOutput = new QueueBuffer(Reference.PACKET_SIZE * 2, Reference.NET_QUOTA, true);
+		netInput = new NioBuffer(Reference.PACKET_SIZE, true);
+		netOutput = new NioBuffer(Reference.PACKET_SIZE * 2, Reference.NET_QUOTA, true);
 		this.isServer = isServer;
 //		isServer = FMLCommonHandler.instance().getEffectiveSide().isServer();
 		if(isServer)
 		{
-			input = new QueueBuffer();
+			input = new NioBuffer();
 			input.connect(parser);
 			input.connect(netOutput);
 			// ECHO
@@ -149,6 +142,8 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	{
 		this.curGui = new GuiMT100(this, this.screen);
 		curGui.connect(netOutput);
+		// local ECHO
+//		curGui.connect(parser);
 		return this.curGui;
 	}
 
@@ -175,7 +170,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 				}
 			}
 			parser.update();
-			if(!netOutput.buffer.isEmpty())
+			if(netOutput.buffer.hasRemaining())
 			{
 				PacketHandler.sendTileData(this, netOutput.buffer);
 				netOutput.buffer.clear();

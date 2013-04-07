@@ -31,8 +31,6 @@ package rainwarrior.mt100;
 
 import java.lang.StringBuffer;
 import java.util.Iterator;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ArrayBlockingQueue;
 import lombok.Delegate;
 import rainwarrior.mt100.Sym.C0;
 import rainwarrior.mt100.Sym.C1;
@@ -58,7 +56,7 @@ public class Parser implements IReceiver, ITicker
 	}
 
 	@Delegate(types=IReceiver.class)
-	QueueBuffer buffer = new QueueBuffer(false);
+	NioBuffer buffer = new NioBuffer(false);
 	IParserConsumer consumer;
 	int c = 0;
 	int shift = 0;
@@ -70,6 +68,7 @@ public class Parser implements IReceiver, ITicker
 	public Parser(IParserConsumer consumer)
 	{
 		this.consumer = consumer;
+		buffer.buffer.clear();
 		curState = State.GROUND;
 	}
 
@@ -77,12 +76,15 @@ public class Parser implements IReceiver, ITicker
 	public void update()
 	{
 		int quota = Reference.PARSER_UPDATE_QUOTA;
-		while(!buffer.buffer.isEmpty() && quota != 0)
+		buffer.buffer.flip();
+		while(buffer.buffer.hasRemaining() && quota != 0)
 		{
-			Byte b = buffer.buffer.poll();
+//			MT100.logger.info("TEST " + buffer.buffer.position() + " " + buffer.buffer.limit() + " " + buffer.buffer.capacity());
+			Byte b = buffer.buffer.get();
 			parse(b);
 			if(quota > 0) quota--;
 		}
+		buffer.buffer.compact();
 	}
 
 	/*

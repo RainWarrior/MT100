@@ -42,7 +42,7 @@ import rainwarrior.mt100.Sym.C1;
 
 public class GuiMT100 extends GuiScreen implements ISender, ITicker
 {
-	QueueBuffer buffer = new QueueBuffer();
+	NioBuffer buffer = new NioBuffer();
 	TileEntityMT100 te;
 	Screen screen;
 	long ot = 0;

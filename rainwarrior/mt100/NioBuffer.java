@@ -50,6 +50,7 @@ public class NioBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 //		MT100.registerTicker(this);
 		this.quota = quota;
 		this.buffer = ByteBuffer.allocate(size);
+		this.buffer.clear();
 		safe = new SafeSenderAdapter(this);
 	}
 
@@ -71,10 +72,12 @@ public class NioBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	@Override
 	public synchronized void update()
 	{
+		buffer.flip();
 		if(buffer.hasRemaining() && !recs.isEmpty())
 		{
 			ReceiverHelper.updateFromByteBuffer(recs, buffer);
 		}
+		buffer.compact();
 	}
 
 	@Override

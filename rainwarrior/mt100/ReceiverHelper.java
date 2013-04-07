@@ -62,7 +62,7 @@ public class ReceiverHelper
 		while(output.hasRemaining() && data.hasNext() && quota != 0)
 		{
 			byte b = data.next();
-			MT100.logger.info("RECV: " + b);
+//			MT100.logger.info("RECV: " + b);
 			output.put(b);
 			if(quota > 0) quota--;
 			ret++;
@@ -124,7 +124,7 @@ public class ReceiverHelper
 		for(byte bt : b)
 		{
 			buf.add(bt);
-			MT100.logger.info("SEND: " + bt);
+//			MT100.logger.info("SEND: " + bt);
 		}
 		int ret;
 		for(IReceiver rec : recs)

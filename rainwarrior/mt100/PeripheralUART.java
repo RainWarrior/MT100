@@ -50,7 +50,7 @@ import rainwarrior.mt100.Sym.CS;
 public class PeripheralUART implements IHostedPeripheral, IParserConsumer, ISender, IReceiver, ITicker
 {
 	@Delegate(types=ISender.class)
-	QueueBuffer output = new QueueBuffer(); // CC -> UART
+	NioBuffer output = new NioBuffer(); // CC -> UART
 
 	volatile IComputerAccess computer = null;
 	static final AtomicReferenceFieldUpdater<PeripheralUART, IComputerAccess> updater = AtomicReferenceFieldUpdater.newUpdater(PeripheralUART.class, IComputerAccess.class, "computer");
