@@ -1,6 +1,6 @@
 /*
 
-Copyright © 2012 RainWarrior
+Copyright © 2012, 2013 RainWarrior
 
 This file is part of MT100.
 
@@ -62,5 +62,7 @@ public class PstFontRegistry
 //		loadFont("Uni2-Terminus16.psf.gz");
 //		loadFont("Lat15-Terminus14.psf.gz");
 //		loadFont("Lat15-Terminus20x10.psf.gz");
+//		loadFont("gr928-8x16-thin.psfu.gz");
+//		loadFont("gr737b-9x16-medieval.psfu.gz");
 	}
 }

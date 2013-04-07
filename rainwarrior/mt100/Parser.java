@@ -1,6 +1,6 @@
 /*
 
-Copyright © 2012 RainWarrior
+Copyright © 2012, 2013 RainWarrior
 
 This file is part of MT100.
 

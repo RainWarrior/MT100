@@ -31,12 +31,11 @@ package rainwarrior.mt100;
 
 import java.util.Iterator;
 import java.util.HashSet;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ArrayBlockingQueue;
+import java.nio.ByteBuffer;
 
-public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
+public class NioBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 {
-	public BlockingQueue<Byte> buffer;
+	public ByteBuffer buffer;
 	public HashSet<IReceiver> recs = new HashSet<IReceiver>();
 	SafeSenderAdapter safe;
 	public int quota;
@@ -46,25 +45,25 @@ public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	/*
 	 * Quota affects receiving speed
 	 */
-	public QueueBuffer(int size, int quota, boolean noisy)
+	public NioBuffer(int size, int quota, boolean noisy)
 	{
 //		MT100.registerTicker(this);
 		this.quota = quota;
-		this.buffer = new ArrayBlockingQueue<Byte>(size);
+		this.buffer = ByteBuffer.allocate(size);
 		safe = new SafeSenderAdapter(this);
 	}
 
-	public QueueBuffer(int size, boolean noisy)
+	public NioBuffer(int size, boolean noisy)
 	{
 		this(size, Reference.QUOTA, noisy);
 	}
 
-	public QueueBuffer(boolean noisy)
+	public NioBuffer(boolean noisy)
 	{
 		this(Reference.QUEUE_SIZE, Reference.QUOTA, noisy);
 	}
 
-	public QueueBuffer()
+	public NioBuffer()
 	{
 		this(Reference.QUEUE_SIZE, Reference.QUOTA, true);
 	}
@@ -72,22 +71,22 @@ public class QueueBuffer implements ISender, IUnsafeSender, IReceiver, ITicker
 	@Override
 	public synchronized void update()
 	{
-		if(!buffer.isEmpty() && !recs.isEmpty())
+		if(buffer.hasRemaining() && !recs.isEmpty())
 		{
-			ReceiverHelper.updateFromQueue(recs, buffer);
+			ReceiverHelper.updateFromByteBuffer(recs, buffer);
 		}
 	}
 
 	@Override
 	public int capacity()
 	{
-		return buffer.remainingCapacity();
+		return buffer.remaining();
 	}
 
 	@Override
 	public synchronized int receive(Iterator<Byte> data)
 	{
-		int ret = ReceiverHelper.receiveIntoQueue(buffer, data, quota);
+		int ret = ReceiverHelper.receiveIntoByteBuffer(buffer, data, quota);
 		//update();
 		return ret;
 	}

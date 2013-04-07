@@ -1,6 +1,6 @@
 /*
 
-Copyright © 2012 RainWarrior
+Copyright © 2012, 2013 RainWarrior
 
 This file is part of MT100.
 
@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Collection;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.nio.ByteBuffer;
 import rainwarrior.mt100.MT100;
 import cpw.mods.fml.common.FMLCommonHandler;
 
@@ -48,6 +49,21 @@ public class ReceiverHelper
 			{
 				throw new RuntimeException("queue offer fail");
 			}
+			if(quota > 0) quota--;
+			ret++;
+		}
+		return ret;
+	}
+
+	// Buffer must be in write mode
+	public static int receiveIntoByteBuffer(ByteBuffer output, Iterator<Byte> data, int quota)
+	{
+		int ret = 0;
+		while(output.hasRemaining() && data.hasNext() && quota != 0)
+		{
+			byte b = data.next();
+			MT100.logger.info("RECV: " + b);
+			output.put(b);
 			if(quota > 0) quota--;
 			ret++;
 		}
@@ -76,6 +92,41 @@ public class ReceiverHelper
 		ArrayList<Byte> buf = new ArrayList<Byte>(m);
 		int ret = input.drainTo(buf, m);
 		assert ret == m;
+		for(IReceiver rec : recs)
+		{
+			ret = rec.receive(buf.iterator());
+			if(ret != m)
+			{
+				MT100.logger.severe("Receiver can't handle it's capacity");
+			}
+//			MT100.logger.info("#");
+		}
+	}
+
+	// buffer must be in read mode
+	public static void updateFromByteBuffer(Collection<IReceiver> recs, ByteBuffer input)
+	{
+		if(recs.size() == 0)
+		{
+			throw new RuntimeException("BAD");
+		}
+		int m = input.remaining();
+		for(IReceiver rec : recs)
+		{
+			int c = rec.capacity();
+			if(m > c) m = c;
+//			MT100.logger.info("@");
+		}
+//		MT100.logger.info("3 " + FMLCommonHandler.instance().getEffectiveSide() + m + " " + recs.size());
+		byte[] b = new byte[m];
+		input.get(b);
+		ArrayList<Byte> buf = new ArrayList<Byte>(m);
+		for(byte bt : b)
+		{
+			buf.add(bt);
+			MT100.logger.info("SEND: " + bt);
+		}
+		int ret;
 		for(IReceiver rec : recs)
 		{
 			ret = rec.receive(buf.iterator());

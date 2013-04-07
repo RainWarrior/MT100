@@ -1,6 +1,6 @@
 /*
 
-Copyright © 2012 RainWarrior
+Copyright © 2012, 2013 RainWarrior
 
 This file is part of MT100.
 
@@ -60,7 +60,8 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	public Screen screen;
 	public Parser parser;
 	boolean isServer;
-	public PeripheralUART uart = null;
+	public PeripheralUART uart;
+//	public SocketUART uart;
 
 	@Delegate(types=IReceiver.class)
 	public QueueBuffer input;
@@ -72,7 +73,6 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	public Object updateLock = new Object();
 
 	public boolean backlight = true;
-	@SideOnly(Side.CLIENT)
 
 	public TileEntityMT100()
 	{
@@ -80,7 +80,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 	}
 	public TileEntityMT100(boolean isServer)
 	{
-		screen = new Screen(40, 24, true);
+		screen = new Screen(80, 24, true);
 		parser = new Parser(new ScreenConsumer(screen));
 		netInput = new QueueBuffer(Reference.PACKET_SIZE, true);
 		netOutput = new QueueBuffer(Reference.PACKET_SIZE * 2, Reference.NET_QUOTA, true);
@@ -95,6 +95,10 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 //			d = new DropBuffer(true);
 //			netInput.connect(d);
 //			d.connect(input);
+			// Socket
+//			uart = new SocketUART(this, "127.0.0.1", 514);
+//			this.connect(uart);
+//			uart.connect(this);
 		}
 		else
 		{
@@ -159,6 +163,7 @@ public class TileEntityMT100 extends TileEntity implements IReceiver, ISender //
 			{
 //				MT100.logger.info(" " + input.buffer.size());
 //				if(uart != null) uart.update();
+//				uart.update();
 				input.update();
 //				MT100.logger.info(" " + input.buffer.size());
 			}
