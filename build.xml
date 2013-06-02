@@ -1,5 +1,6 @@
 <project name="mcp" default="compile" basedir=".">
 
+	<property name="scala.lib.dir" location="/home/rainwarrior/codedump/scala-2.10.1/lib"/>
 	<property name="src.dir" location="src/minecraft"/>
 	<property name="build.dir" location="bin/minecraft"/>
 	<property name="dist.dir" location="dist"/>
@@ -14,6 +15,8 @@
 	<path id="build.path">
 		<fileset dir="${lib.dir}" includes="**/*.jar"/>
 		<pathelement location="${resources.dir}"/>
+		<pathelement location="${build.dir}"/>
+		<pathelement location="${scala.lib.dir}/scala-library.jar"/>
 		<fileset dir="${lwjgl.jars.dir}">
 			<include name="jinput.jar"/>
 			<include name="lwjgl.jar"/>
@@ -27,6 +30,15 @@
 		<path refid="build.path"/>
 	</path>
 
+	<!-- Scala compiler task -->
+	<taskdef resource="scala/tools/ant/antlib.xml">
+		<classpath>
+			<pathelement location="${scala.lib.dir}/scala-compiler.jar"/>
+			<pathelement location="${scala.lib.dir}/scala-reflect.jar"/>
+			<pathelement location="${scala.lib.dir}/scala-library.jar"/>
+		</classpath>
+	</taskdef>
+
 	<target name="init">
 		<mkdir dir="${build.dir}"/>
 	</target>
@@ -36,7 +48,7 @@
 		<echo message="Classpath = ${debug.path}"/>
 	</target>
 
-	<target name="compile" depends="init">
+	<target name="compile" depends="compile-scala">
 		<javac
 			includeantruntime="false"
 			srcdir="${src.dir}"
@@ -55,16 +67,58 @@
 		</javac>
 	</target>
 
+	<target name="compile-scala" depends="init">
+		<scalac
+			srcdir="${src.dir}"
+			destdir="${build.dir}"
+			encoding="UTF-8"
+			deprecation="true"
+			classpathref="build.path"
+			addparams="-P:continuations:enable"
+		>
+			<include name="**/*.scala"/>
+			<include name="**/*.java"/>
+		</scalac>
+	</target>
+
+	<!--target name="scala-reset" depends="init">
+		<fsc
+			srcdir="${src.dir}"
+			destdir="${build.dir}"
+			encoding="UTF-8"
+			deprecation="true"
+			classpathref="build.path"
+			addparams="-feature"
+			reset="true"
+		/>
+	</target-->
+
 	<target name="run" depends="compile">
 		<mkdir dir="${run.dir}"/>
 		<java
 			dir="${run.dir}"
 			classname="${main-class}"
 			fork="true"
-			maxmemory="1024m"
+			maxmemory="2048m"
 			classpathref="run.path"
 		>
 			<jvmarg value="-ea"/>
+			<jvmarg value="-Xincgc"/>
+			<jvmarg value="-Djava.library.path=${lwjgl.natives.dir}"/>
+		</java>
+	</target>
+
+	<target name="drun" depends="compile">
+		<mkdir dir="${run.dir}"/>
+		<java
+			dir="${run.dir}"
+			classname="${main-class}"
+			fork="true"
+			maxmemory="2048m"
+			classpathref="run.path"
+		>
+			<jvmarg value="-ea"/>
+			<jvmarg value="-agentlib:jdwp=transport=dt_socket,address=8000,server=y,suspend=y"/>
 			<jvmarg value="-Xincgc"/>
 			<jvmarg value="-Djava.library.path=${lwjgl.natives.dir}"/>
 		</java>
@@ -74,6 +128,7 @@
 		<exec executable="python" dir=".">
 			<arg value="runtime/reobfuscate.py" />
 			<arg value="--client" />
+			<arg value="--srgnames" />
 		</exec>
 	</target>
 
